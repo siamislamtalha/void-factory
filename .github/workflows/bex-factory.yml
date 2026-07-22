@@ -1,6 +1,9 @@
 name: BEX Factory Release
 
 on:
+  push:
+    branches:
+      - master
   workflow_dispatch:
     inputs:
       release_tag:
