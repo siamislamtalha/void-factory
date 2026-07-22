@@ -1,0 +1,147 @@
+name: BEX Factory Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Base release tag (run number will be appended)
+        required: false
+        default: factory
+      release_name:
+        description: Base release title (run number will be appended)
+        required: false
+        default: Bloomee Plugin Factory
+
+permissions:
+  contents: write
+
+concurrency:
+  group: bex-factory-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set Release Details
+        id: vars
+        shell: bash
+        run: |
+          TAG="${{ inputs.release_tag || 'bloomfactory-v' }}${{ github.run_number }}"
+          NAME="${{ inputs.release_name || 'Bloomee Plugin Factory' }} #${{ github.run_number }}"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "name=$NAME" >> "$GITHUB_OUTPUT"
+          echo "Prepared Release: $NAME ($TAG)"
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Cache Rust build
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install cargo-component
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Attempting to fetch pre-built cargo-component..."
+          if gh release download --repo bytecodealliance/cargo-component --pattern "*x86_64-unknown-linux-gnu.tar.gz" --dir .; then
+            tar -xzf *x86_64-unknown-linux-gnu.tar.gz
+            find . -type f -name "cargo-component" -exec chmod +x {} \; -exec mv {} ~/.cargo/bin/ \;
+            rm *x86_64-unknown-linux-gnu.tar.gz
+            echo "Successfully installed pre-built cargo-component."
+          else
+            echo "Failed to download pre-built binary. Falling back to cargo install..."
+            cargo install cargo-component --locked
+          fi
+
+      - name: Install bex
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Attempting to fetch pre-built bex from siamislamtalha/Void-ext..."
+          if gh release download --repo siamislamtalha/Void-ext --pattern "bex-linux-x86_64.tar.gz" --dir .; then
+            tar -xzf bex-linux-x86_64.tar.gz
+            chmod +x bex
+            mv bex ~/.cargo/bin/
+            rm bex-linux-x86_64.tar.gz
+            echo "Successfully installed pre-built bex."
+          else
+            echo "Failed to download pre-built binary. Falling back to cargo install..."
+            cargo install --git "https://github.com/siamislamtalha/Void-ext" --bin bex --locked
+          fi
+
+      - name: Build and pack all plugins
+        run: bex pack-all --dir . --output-dir plugins --skip-failures
+
+      - name: Count packed plugins
+        id: packed
+        shell: bash
+        run: |
+          count=$(find plugins -maxdepth 1 -type f -name "*.bex" | wc -l)
+          echo "bex_count=$count" >> "$GITHUB_OUTPUT"
+          echo "Found $count .bex file(s)"
+
+      - name: Finalize bex-factory.json
+        if: steps.packed.outputs.bex_count != '0'
+        shell: bash
+        env:
+          # --- YOU CAN MANUALLY EDIT THESE THREE VARIABLES (These names are default text are not official.) ---
+          FACTORY_NAME: "VoidFactory (Unofficial + Community)"
+          FACTORY_DESCRIPTION: "Plugin repository for Bloomee by community." # Leave empty for null
+          FACTORY_THUMBNAIL_URL: "" # Leave empty for null
+        run: |
+          stamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          base="https://github.com/${{ github.repository }}/releases/download/${{ steps.vars.outputs.tag }}"
+
+          jq --arg base "$base" \
+             --arg stamp "$stamp" \
+             --arg name "$FACTORY_NAME" \
+             --arg desc "$FACTORY_DESCRIPTION" \
+             --arg thumb "$FACTORY_THUMBNAIL_URL" '
+            .name = $name
+            | .description = (if $desc == "" then null else $desc end)
+            | .thumbnail_url = (if $thumb == "" then null else $thumb end)
+            | .generated_at = $stamp
+            | .plugins |= map(. + {
+                last_updated: $stamp,
+                download_url: ($base + "/" + .asset_name),
+                released_at: $stamp
+              })
+          ' plugins/bex-factory.json > bex-factory.json
+
+      - name: Publish GitHub release
+        if: steps.packed.outputs.bex_count != '0'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          tag="${{ steps.vars.outputs.tag }}"
+          name="${{ steps.vars.outputs.name }}"
+
+          gh release delete "$tag" --yes --cleanup-tag 2>/dev/null || true
+
+          gh release create "$tag" plugins/*.bex bex-factory.json \
+            --title "$name" \
+            --notes "Auto-built Void plugins for run ${{ github.run_number }}"
+
+      - name: Commit updated bex-factory.json
+        if: steps.packed.outputs.bex_count != '0'
+        shell: bash
+        run: |
+          if git diff --quiet -- bex-factory.json; then
+            echo "No changes to bex-factory.json - skipping commit."
+            exit 0
+          fi
+          git config user.name github-actions
+          git config user.email github-actions@users.noreply.github.com
+          git add bex-factory.json
+          git commit -m "chore: update bexfactory index for run ${{ github.run_number }} [skip ci]"
+          git push
