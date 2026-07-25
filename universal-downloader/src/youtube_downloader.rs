@@ -8,9 +8,12 @@
 
 use crate::credentials::YOUTUBE_CREDENTIALS;
 use anyhow::{anyhow, Result};
-use reqwest::Client;
+use bex_core::resolver::component::content_resolver::utils::{
+    http_request, HttpMethod, RequestOptions,
+};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::str;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct YouTubeClient {
@@ -105,13 +108,13 @@ struct StreamingData {
     #[serde(rename = "adaptiveFormats")]
     adaptive_formats: Option<Vec<AdaptiveFormat>>,
     #[serde(rename = "expiresInSeconds")]
-    expires_in_seconds: Option<String>,
+    _expires_in_seconds: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
 struct AdaptiveFormat {
     #[serde(rename = "itag")]
-    itag: i32,
+    _itag: i32,
     #[serde(rename = "url")]
     url: Option<String>,
     #[serde(rename = "cipher")]
@@ -125,31 +128,27 @@ struct AdaptiveFormat {
     #[serde(rename = "contentLength")]
     content_length: Option<String>,
     #[serde(rename = "approxDurationMs")]
-    duration_ms: Option<String>,
+    _duration_ms: Option<String>,
 }
 
 pub struct YouTubeDownloader {
-    client: Client,
     api_key: String,
 }
 
 impl YouTubeDownloader {
     pub fn new() -> Self {
         Self {
-            client: Client::new(),
             api_key: YOUTUBE_CREDENTIALS.get_current(),
         }
     }
 
     pub fn with_rotated_key() -> Self {
         Self {
-            client: Client::new(),
             api_key: YOUTUBE_CREDENTIALS.rotate(),
         }
     }
 
-    pub async fn get_stream_url(&self, video_id: &str) -> Result<String> {
-        // Try multiple clients in order of priority
+    pub fn get_stream_url(&self, video_id: &str) -> Result<String> {
         let clients = vec![
             YouTubeClient::android_vr(),
             YouTubeClient::ios(),
@@ -158,7 +157,7 @@ impl YouTubeDownloader {
         ];
 
         for client in clients {
-            match self.get_stream_url_with_client(video_id, &client).await {
+            match self.get_stream_url_with_client(video_id, &client) {
                 Ok(url) => return Ok(url),
                 Err(e) => {
                     eprintln!("Client {:?} failed: {}", client.client_name, e);
@@ -170,7 +169,7 @@ impl YouTubeDownloader {
         Err(anyhow!("All YouTube clients failed"))
     }
 
-    async fn get_stream_url_with_client(&self, video_id: &str, client: &YouTubeClient) -> Result<String> {
+    fn get_stream_url_with_client(&self, video_id: &str, client: &YouTubeClient) -> Result<String> {
         let context = PlayerRequestContext {
             client: YouTubeClientContext {
                 client_name: client.client_name.clone(),
@@ -193,29 +192,41 @@ impl YouTubeDownloader {
             self.api_key
         );
 
-        let response = self
-            .client
-            .post(&url)
-            .header("Content-Type", "application/json")
-            .header("X-Goog-Api-Format-Version", "1")
-            .header("X-YouTube-Client-Name", &client.client_name)
-            .header("X-YouTube-Client-Version", &client.client_version)
-            .header("User-Agent", &client.user_agent)
-            .header("Referer", client.referer.as_ref().unwrap_or(&"https://www.youtube.com/".to_string()))
-            .json(&request)
-            .send()
-            .await?;
+        let body_bytes = serde_json::to_vec(&request)?;
 
-        if !response.status().is_success() {
-            return Err(anyhow!("HTTP error: {}", response.status()));
+        let mut headers = vec![
+            ("Content-Type".to_string(), "application/json".to_string()),
+            ("X-Goog-Api-Format-Version".to_string(), "1".to_string()),
+            ("X-YouTube-Client-Name".to_string(), client.client_name.clone()),
+            ("X-YouTube-Client-Version".to_string(), client.client_version.clone()),
+            ("User-Agent".to_string(), client.user_agent.clone()),
+        ];
+        if let Some(ref referer) = client.referer {
+            headers.push(("Referer".to_string(), referer.clone()));
         }
 
-        let player_response: PlayerResponse = response.json().await?;
+        let options = RequestOptions {
+            method: HttpMethod::Post,
+            headers: Some(headers),
+            body: Some(body_bytes),
+            timeout_seconds: Some(10),
+        };
+
+        let response = http_request(&url, &options).map_err(|e| anyhow!("HTTP error: {}", e))?;
+
+        if response.status < 200 || response.status >= 300 {
+            return Err(anyhow!("HTTP error: {}", response.status));
+        }
+
+        let player_response: PlayerResponse = serde_json::from_slice(&response.body)?;
 
         if player_response.playability_status.status != "OK" {
             return Err(anyhow!(
                 "Playability error: {}",
-                player_response.playability_status.reason.unwrap_or_else(|| "Unknown".to_string())
+                player_response
+                    .playability_status
+                    .reason
+                    .unwrap_or_else(|| "Unknown".to_string())
             ));
         }
 
@@ -223,7 +234,6 @@ impl YouTubeDownloader {
             .streaming_data
             .ok_or_else(|| anyhow!("No streaming data available"))?;
 
-        // Find best audio-only format
         let audio_format = streaming_data
             .adaptive_formats
             .as_ref()
@@ -238,7 +248,6 @@ impl YouTubeDownloader {
         let stream_url = if let Some(url) = &audio_format.url {
             url.clone()
         } else {
-            // Handle cipher/signature
             let cipher = audio_format
                 .cipher
                 .as_ref()
@@ -248,14 +257,15 @@ impl YouTubeDownloader {
             self.decode_cipher(cipher)?
         };
 
-        // Add range to avoid YouTube throttling
-        let content_length = audio_format.content_length.as_ref().and_then(|l| l.parse::<u64>().ok()).unwrap_or(10_000_000);
+        let content_length = audio_format
+            .content_length
+            .as_ref()
+            .and_then(|l| l.parse::<u64>().ok())
+            .unwrap_or(10_000_000);
         Ok(format!("{}&range=0-{}", stream_url, content_length))
     }
 
     fn decode_cipher(&self, cipher: &str) -> Result<String> {
-        // Simple cipher decoding (placeholder - full implementation would be complex)
-        // This is a simplified version - real implementation needs full cipher decoding logic
         let params: HashMap<String, String> = cipher
             .split('&')
             .filter_map(|part| {
@@ -265,7 +275,6 @@ impl YouTubeDownloader {
             .collect();
 
         let url = params.get("url").ok_or_else(|| anyhow!("No URL in cipher"))?;
-        // In real implementation, you would decode the signature here
         Ok(url.clone())
     }
 }

@@ -9,9 +9,6 @@ pub mod resolver;
 #[cfg(feature = "chart")]
 pub mod chart;
 
-#[cfg(feature = "scrobbler")]
-pub mod scrobbler;
-
 #[cfg(feature = "suggestion")]
 pub mod suggestion;
 
