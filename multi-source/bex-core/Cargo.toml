@@ -16,7 +16,6 @@ anyhow = "1.0"
 default = []
 resolver   = []
 lyrics     = []
-scrobbler  = []
 chart      = []
 suggestion = []
 importer   = []
