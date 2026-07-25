@@ -49,6 +49,7 @@ impl YouTubeCredentialPool {
         self.keys[index % self.keys.len()].clone()
     }
 
+    #[allow(dead_code)]
     pub fn reset(&self) {
         self.current_index.store(0, Ordering::Relaxed);
     }
@@ -91,6 +92,7 @@ impl JioSaavnServerPool {
         self.servers[index % self.servers.len()].clone()
     }
 
+    #[allow(dead_code)]
     pub fn reset(&self) {
         self.current_index.store(0, Ordering::Relaxed);
     }
@@ -103,9 +105,10 @@ impl Default for JioSaavnServerPool {
 }
 
 /// JioSaavn DES-ECB decryption key (from Echo-Music APK reference)
-pub const JIOSAAVN_DES_KEY: &[u8] = b"38346591";
+pub const JIOSAAVN_DES_KEY: &[u8; 8] = b"38346591";
 
 /// JioSaavn API configuration
+#[allow(dead_code)]
 pub struct JioSaavnConfig {
     pub api_version: String,
     pub context: String,

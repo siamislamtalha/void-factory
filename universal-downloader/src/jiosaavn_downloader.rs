@@ -7,10 +7,11 @@
 
 use crate::credentials::{JIOSAAVN_DES_KEY, JIOSAAVN_SERVERS};
 use anyhow::{anyhow, Result};
+use base64::{engine::general_purpose, Engine as _};
 use bex_core::resolver::component::content_resolver::utils::{
     http_request, HttpMethod, RequestOptions,
 };
-use des::cipher::BlockCipher;
+use des::cipher::{generic_array::GenericArray, BlockDecrypt, KeyInit};
 use des::Des;
 use serde::Deserialize;
 use std::str;
@@ -88,32 +89,43 @@ impl JioSaavnDownloader {
     }
 
     fn decrypt_url(&self, encrypted_url: &str) -> Result<String> {
-        let cipher = Des::new(JIOSAAVN_DES_KEY);
-        let encrypted_bytes = base64::decode(encrypted_url)?;
-        let block_size = 8;
-        if encrypted_bytes.len() % block_size != 0 {
+        // 1. Base64 decode using the correct engine API (base64 0.21+)
+        let mut encrypted_bytes = general_purpose::STANDARD
+            .decode(encrypted_url)
+            .map_err(|e| anyhow!("Base64 decode failed: {}", e))?;
+
+        // DES block size is 8 bytes
+        if encrypted_bytes.len() % 8 != 0 {
             return Err(anyhow!("Encrypted data length not divisible by block size"));
         }
 
-        let mut decrypted_bytes = Vec::new();
-        for chunk in encrypted_bytes.chunks(block_size) {
-            let mut block = [0u8; 8];
-            block.copy_from_slice(chunk);
-            cipher.decrypt_block(&mut block);
-            decrypted_bytes.extend_from_slice(&block);
+        // 2. DES-ECB decrypt using KeyInit + BlockDecrypt
+        let cipher = Des::new(GenericArray::from_slice(JIOSAAVN_DES_KEY));
+
+        // In-place block decryption
+        for chunk in encrypted_bytes.chunks_mut(8) {
+            let block = GenericArray::from_mut_slice(chunk);
+            cipher.decrypt_block(block);
         }
 
-        if let Some(&padding_len) = decrypted_bytes.last() {
-            if padding_len as usize <= block_size && padding_len > 0 {
-                let padding_start = decrypted_bytes.len().saturating_sub(padding_len as usize);
-                if decrypted_bytes[padding_start..].iter().all(|&b| b == padding_len) {
-                    decrypted_bytes.truncate(padding_start);
+        // 3. PKCS#7 unpadding
+        let decrypted_len = encrypted_bytes.len();
+        if decrypted_len > 0 {
+            let last_byte = encrypted_bytes[decrypted_len - 1];
+            if last_byte > 0 && last_byte <= 8 {
+                let pad_len = last_byte as usize;
+                if decrypted_len >= pad_len {
+                    let padding_start = decrypted_len - pad_len;
+                    if encrypted_bytes[padding_start..].iter().all(|&b| b == last_byte) {
+                        encrypted_bytes.truncate(padding_start);
+                    }
                 }
             }
         }
 
-        let decrypted_str = str::from_utf8(&decrypted_bytes)?;
-        Ok(decrypted_str.to_string())
+        let decrypted_str = String::from_utf8(encrypted_bytes)
+            .map_err(|e| anyhow!("UTF-8 decode failed: {}", e))?;
+        Ok(decrypted_str)
     }
 
     fn apply_quality(&self, url: &str, quality: JioSaavnQuality) -> Result<String> {

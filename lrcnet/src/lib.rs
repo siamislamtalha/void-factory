@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 mod mapper;
 mod parser;
 mod kugou;

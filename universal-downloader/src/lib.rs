@@ -42,6 +42,7 @@ use bex_core::resolver::{
     types::MediaItem,
 };
 
+#[allow(dead_code)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum DownloadMethod {
     YouTubeInnertube,
@@ -52,6 +53,7 @@ pub enum DownloadMethod {
     DirectHttp,
 }
 
+#[allow(dead_code)]
 impl DownloadMethod {
     fn as_str(&self) -> &'static str {
         match self {
@@ -92,7 +94,7 @@ impl DiscoveryGuest for Component {
 impl DataSourceGuest for Component {
     fn get_track_details(id: String) -> Result<bex_core::resolver::types::Track, String> {
         // Delegate to stream resolver for track details
-        stream_resolver::get_track_details(&id)
+        stream_resolver::get_track_details(&id).map_err(|e| e.to_string())
     }
 
     fn get_album_details(_id: String) -> Result<AlbumDetails, String> {
@@ -121,7 +123,7 @@ impl DataSourceGuest for Component {
 
     fn get_streams(track_id: String) -> Result<Vec<StreamSource>, String> {
         // Main function: try all download methods with fallback
-        stream_resolver::get_streams_with_fallback(&track_id)
+        stream_resolver::get_streams_with_fallback(&track_id).map_err(|e| e.to_string())
     }
 
     fn get_segments(_track_id: String) -> Result<Vec<bex_core::resolver::types::MediaSegment>, String> {

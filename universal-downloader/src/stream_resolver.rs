@@ -186,6 +186,7 @@ fn get_http_fallback_for_jiosaavn(track_id: &str) -> Result<Vec<StreamSource>> {
 }
 
 /// Utility function to reset credential pools
+#[allow(dead_code)]
 pub fn reset_credentials() {
     YOUTUBE_CREDENTIALS.reset();
 }

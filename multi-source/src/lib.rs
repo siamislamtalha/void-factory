@@ -1,3 +1,6 @@
+#![allow(dead_code)]
+#![allow(unused_variables)]
+
 //! Multi-Source Music Aggregator — bex-core content-resolver plugin.
 //!
 //! This plugin aggregates search results from multiple music services with source tagging.

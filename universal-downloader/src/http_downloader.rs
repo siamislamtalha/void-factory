@@ -41,6 +41,7 @@ impl HttpDownloader {
         Ok(url.to_string())
     }
 
+    #[allow(dead_code)]
     pub fn get_stream_info(&self, url: &str) -> Result<StreamInfo> {
         let options = RequestOptions {
             method: HttpMethod::Head,
@@ -79,6 +80,7 @@ impl HttpDownloader {
         })
     }
 
+    #[allow(dead_code)]
     pub fn download_range(&self, url: &str, start: u64, end: u64) -> Result<Vec<u8>> {
         let options = RequestOptions {
             method: HttpMethod::Get,
@@ -117,6 +119,7 @@ pub struct StreamInfo {
 }
 
 /// Parse quality from URL for direct HTTP downloads
+#[allow(dead_code)]
 pub fn parse_quality_from_url(url: &str) -> Option<String> {
     if url.contains("_320.") {
         Some("320kbps".to_string())
