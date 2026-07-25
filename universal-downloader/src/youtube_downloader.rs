@@ -160,7 +160,7 @@ impl YouTubeDownloader {
             match self.get_stream_url_with_client(video_id, &client) {
                 Ok(url) => return Ok(url),
                 Err(e) => {
-                    eprintln!("Client {:?} failed: {}", client.client_name, e);
+                    let _ = format!("Client {:?} failed: {}", client.client_name, e);
                     continue;
                 }
             }

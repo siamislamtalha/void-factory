@@ -76,15 +76,12 @@ fn get_youtube_streams_with_fallback(video_id: &str) -> Result<Vec<StreamSource>
     let stream_url = match result {
         Ok(url) => url,
         Err(e) => {
-            eprintln!(
-                "Primary YouTube download failed: {}, trying rotated key...",
-                e
-            );
+            let _ = format!("Primary YouTube download failed: {}, trying rotated key...", e);
             let downloader = YouTubeDownloader::with_rotated_key();
             match downloader.get_stream_url(video_id) {
                 Ok(url) => url,
                 Err(e) => {
-                    eprintln!("Rotated key failed: {}, trying HTTP fallback...", e);
+                    let _ = format!("Rotated key failed: {}, trying HTTP fallback...", e);
                     return get_http_fallback_for_youtube(video_id);
                 }
             }
@@ -108,15 +105,12 @@ fn get_jiosaavn_streams_with_fallback(track_id: &str) -> Result<Vec<StreamSource
     let stream_url = match result {
         Ok(url) => url,
         Err(e) => {
-            eprintln!(
-                "Primary JioSaavn server failed: {}, trying rotated server...",
-                e
-            );
+            let _ = format!("Primary JioSaavn server failed: {}, trying rotated server...", e);
             let downloader = JioSaavnDownloader::with_rotated_server();
             match downloader.get_stream_url(track_id, JioSaavnQuality::High) {
                 Ok(url) => url,
                 Err(e) => {
-                    eprintln!("Rotated server failed: {}, trying HTTP fallback...", e);
+                    let _ = format!("Rotated server failed: {}, trying HTTP fallback...", e);
                     return get_http_fallback_for_jiosaavn(track_id);
                 }
             }
