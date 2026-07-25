@@ -2,6 +2,7 @@
 //! Ported from RiMusic and APK reference implementations
 //! Uses KuGou's lyrics API with base64-encoded content
 
+use base64::{Engine as _, engine::general_purpose};
 use bex_core::lyrics::ext::http;
 use serde::Deserialize;
 
@@ -15,12 +16,12 @@ struct SearchResponse {
 }
 
 #[derive(Debug, Deserialize)]
-struct Candidate {
-    id: i64,
+pub(crate) struct Candidate {
+    pub(crate) id: i64,
     #[serde(rename = "accesskey")]
-    access_key: String,
+    pub(crate) access_key: String,
     #[serde(default)]
-    duration: Option<i64>,
+    pub(crate) duration: Option<i64>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -39,11 +40,11 @@ struct SongData {
 }
 
 #[derive(Debug, Deserialize)]
-struct SongInfo {
+pub(crate) struct SongInfo {
     #[serde(default)]
-    hash: Option<String>,
+    pub(crate) hash: Option<String>,
     #[serde(default)]
-    duration: Option<i64>,
+    pub(crate) duration: Option<i64>,
 }
 
 /// Search for lyrics by keyword
@@ -131,7 +132,7 @@ pub fn download_lyrics(id: i64, access_key: &str) -> Result<String, String> {
     let result: DownloadResponse = serde_json::from_str(&body).map_err(|e| e.to_string())?;
     
     // Decode base64 content
-    let decoded = base64::decode(&result.content)
+    let decoded = general_purpose::STANDARD.decode(&result.content)
         .map_err(|e| format!("Base64 decode failed: {}", e))?;
     String::from_utf8(decoded).map_err(|e| e.to_string())
 }
@@ -159,26 +160,18 @@ pub fn build_keyword(artist: &str, title: &str) -> String {
 
 /// Normalize lyrics by removing metadata headers
 pub fn normalize_lyrics(raw: &str) -> String {
-    let lines: Vec<&str> = raw
-        .replace("\r\n", "\n")
-        .trim()
-        .lines()
-        .collect();
+    let normalized = raw.replace("\r\n", "\n");
+    let trimmed = normalized.trim();
+    let lines: Vec<&str> = trimmed.lines().collect();
     
-    let mut to_skip = 0;
     let mut result_lines = Vec::new();
     
     // Skip metadata headers at the beginning
-    for (i, line) in lines.iter().enumerate() {
-        if to_skip > 0 {
-            to_skip -= 1;
-            continue;
-        }
-        
+    for line in lines.iter() {
         // Check for metadata lines
-        if line.starts_with("[ti:") || 
-           line.starts_with("[ar:") || 
-           line.starts_with("[al:") || 
+        if line.starts_with("[ti:") ||
+           line.starts_with("[ar:") ||
+           line.starts_with("[al:") ||
            line.starts_with("[by:") ||
            line.starts_with("[hash:") ||
            line.starts_with("[sign:") ||
@@ -192,7 +185,6 @@ pub fn normalize_lyrics(raw: &str) -> String {
            line.contains("]Producer：") ||
            line.contains("]作曲 : ") ||
            line.contains("]作词 : ") {
-            to_skip = 0;
             continue;
         }
         

@@ -12,7 +12,7 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 anyhow = "1.0"
 reqwest = { version = "0.12", features = ["json", "gzip", "brotli", "deflate"] }
-tokio = { version = "1", features = ["full"] }
+tokio = { version = "1", default-features = false, features = ["rt", "macros", "time"] }
 base64 = "0.21"
 hex = "0.4"
 des = "0.8"

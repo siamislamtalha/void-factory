@@ -114,10 +114,10 @@ fn parse_ttml_time(time_str: &str) -> Option<f64> {
 
 /// Format seconds to LRC time format [MM:SS.ms]
 fn format_lrc_time(seconds: f64) -> String {
-    let total_secs = seconds as u64;
+    let total_secs = seconds.floor() as u64;
     let mins = total_secs / 60;
     let secs = total_secs % 60;
-    let millis = ((seconds - total_secs) * 100.0) as u64;
+    let millis = ((seconds - total_secs as f64) * 100.0) as u64;
     
     format!("{:02}:{:02}.{:02}", mins, secs, millis)
 }
