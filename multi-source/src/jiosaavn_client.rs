@@ -493,7 +493,7 @@ pub fn more_album_tracks(id: &str, page_token: &str) -> Result<PagedTracks> {
     })
 }
 
-pub fn get_stream_source(id: &str) -> Result<Vec<StreamSource>> {
+pub fn get_streams(id: &str) -> Result<Vec<StreamSource>> {
     let params = format!("__call=song.getDetails&pids={}", id);
     let json_str = make_request(&params, true)?;
 
@@ -518,7 +518,7 @@ pub fn get_stream_source(id: &str) -> Result<Vec<StreamSource>> {
             .or(item.encrypted_media_url.clone());
 
         if let Some(enc_url) = encrypted_url {
-            if let Ok(decrypted_url) = crate::crypto::decode_media_url(&enc_url) {
+            if let Ok(decrypted_url) = crate::jiosaavn_crypto::decode_media_url(&enc_url) {
                 let base_url = decrypted_url.clone();
                 let qualities = vec![
                     (Quality::High, "_320"),

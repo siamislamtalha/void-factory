@@ -145,28 +145,28 @@ impl ServerRotator {
 /// Global YouTube API key rotator.
 /// Shared between YouTube Music and YouTube Video clients.
 pub fn youtube_rotator() -> &'static CredentialRotator {
-    static ROTATOR: CredentialRotator = CredentialRotator::new(YOUTUBE_API_KEYS);
+    static ROTATOR: std::sync::LazyLock<CredentialRotator> = std::sync::LazyLock::new(|| CredentialRotator::new(YOUTUBE_API_KEYS));
     &ROTATOR
 }
 
 /// Global JioSaavn server rotator.
 /// Used for automatic server fallback.
 pub fn jiosaavn_server_rotator() -> &'static ServerRotator {
-    static ROTATOR: ServerRotator = ServerRotator::new(JIOSAAVN_DEFAULT_SERVERS);
+    static ROTATOR: std::sync::LazyLock<ServerRotator> = std::sync::LazyLock::new(|| ServerRotator::new(JIOSAAVN_DEFAULT_SERVERS));
     &ROTATOR
 }
 
 /// Global Spotify client ID rotator.
 /// Used for automatic credential rotation.
 pub fn spotify_client_id_rotator() -> &'static CredentialRotator {
-    static ROTATOR: CredentialRotator = CredentialRotator::new(SPOTIFY_CLIENT_IDS);
+    static ROTATOR: std::sync::LazyLock<CredentialRotator> = std::sync::LazyLock::new(|| CredentialRotator::new(SPOTIFY_CLIENT_IDS));
     &ROTATOR
 }
 
 /// Global Spotify client secret rotator.
 /// Used for automatic credential rotation.
 pub fn spotify_client_secret_rotator() -> &'static CredentialRotator {
-    static ROTATOR: CredentialRotator = CredentialRotator::new(SPOTIFY_CLIENT_SECRETS);
+    static ROTATOR: std::sync::LazyLock<CredentialRotator> = std::sync::LazyLock::new(|| CredentialRotator::new(SPOTIFY_CLIENT_SECRETS));
     &ROTATOR
 }
 

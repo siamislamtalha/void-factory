@@ -91,11 +91,13 @@ impl DiscoveryGuest for Component {
         // Parse section_id to determine source
         if section_id.starts_with("ytm:") {
             ytmusic_client::load_more_items(&section_id[4..], &page_token)
+                .map_err(|e| e.to_string())
         } else if section_id.starts_with("jio:") {
             // JioSaavn load more if available
             Ok(vec![])
         } else {
             ytmusic_client::load_more_items(&section_id, &page_token)
+                .map_err(|e| e.to_string())
         }
     }
 }
@@ -250,7 +252,8 @@ impl DataSourceGuest for Component {
         }
         
         // Search JioSaavn (with DES decryption support)
-        if let Ok(results) = jiosaavn_client::search(&query, filter, page_token.as_deref()) {
+        let page = page_token.and_then(|t| t.parse::<i32>().ok()).unwrap_or(1);
+        if let Ok(results) = jiosaavn_client::search(&query, filter, page) {
             all_items.extend(results.items.into_iter().map(|mut item| {
                 add_source_tag(&mut item, MusicSource::JioSaavn);
                 item

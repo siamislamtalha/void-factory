@@ -125,8 +125,8 @@ fn try_kugou(metadata: &TrackMetadata) -> Result<Option<(Lyrics, LyricsMetadata)
                 if let Some(track_duration) = duration_sec {
                     // Check if duration matches within tolerance (8 seconds)
                     if (song_duration - track_duration as i64).abs() <= 8 {
-                        if let Some(hash) = song.hash {
-                            if let Ok(candidates) = kugou::search_by_hash(&hash) {
+                        if let Some(ref hash) = song.hash {
+                            if let Ok(candidates) = kugou::search_by_hash(hash) {
                                 if let Some(candidate) = candidates.first() {
                                     if let Ok(lyrics_text) = kugou::download_lyrics(candidate.id, &candidate.access_key) {
                                         let normalized = kugou::normalize_lyrics(&lyrics_text);
