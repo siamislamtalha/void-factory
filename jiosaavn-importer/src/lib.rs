@@ -1,6 +1,6 @@
 //! jiosaavn-importer — BEX content-importer plugin
 //!
-//! Imports JioSaavn playlists and albums into Bloomee.
+//! Imports JioSaavn playlists and albums into Void Music.
 //! Uses the public JioSaavn JSON API — no authentication required.
 //!
 //! Supported URL formats:

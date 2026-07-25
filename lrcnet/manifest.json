@@ -2,11 +2,11 @@
   "manifest_version": "1.0",
   "id": "lyrics-provider.bloomfactory.lrcnet",
   "name": "lrcnet",
-  "version": "1",
+  "version": "2",
   "type": "lyrics-provider",
   "thumbnail_url": "https://lrclib.net/assets/lrclib-370c57eb.png",
-  "publisher": {"name": "bloomfactory"},
-  "description": "It fetches lyrics from LRCNet API, which is a free and open source lyrics database.",
+  "publisher": {"name": "Void Music"},
+  "description": "Multi-source lyrics provider fetching from LRCLIB, KuGou, and BetterLyrics APIs with automatic fallback for maximum coverage.",
   "created_at": "2026-03-13T06:46:44.8992734Z",
-  "last_updated": "2026-03-13T06:46:44.8992734Z"
+  "last_updated": "2026-07-24T16:00:00.0000000Z"
 }

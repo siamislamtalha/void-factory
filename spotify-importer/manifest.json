@@ -5,8 +5,8 @@
   "version": "3",
   "type": "content-importer",
   "thumbnail_url": "https://www.scdn.co/i/_global/favicon.png",
-  "publisher": { "name": "bloomfactory" },
-  "description": "Import Spotify playlists and albums into Bloomee with robust Spotify web token extraction, API-first fetching, and embed fallback",
+  "publisher": { "name": "Void Music" },
+  "description": "Import Spotify playlists and albums into Void Music with robust Spotify web token extraction, API-first fetching, and embed fallback",
   "created_at": "2026-03-13T06:52:27.660671Z",
   "last_updated": "2026-03-13T06:52:27.660671Z"
 }

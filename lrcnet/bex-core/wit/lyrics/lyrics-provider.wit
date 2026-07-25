@@ -1,5 +1,5 @@
 /// @package component:lyrics-provider
-/// @description Standard interface for music lyrics provision in Bloomee.
+/// @description Standard interface for music lyrics provision in Void Music.
 /// Supports automated metadata matching and manual lookup by ID.
 package component:lyrics-provider;
 

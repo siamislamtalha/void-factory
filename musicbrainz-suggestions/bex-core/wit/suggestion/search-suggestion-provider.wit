@@ -1,5 +1,5 @@
 /// @package component:search-suggestion-provider
-/// @description Standard interface for search suggestions and autocomplete in Bloomee.
+/// @description Standard interface for search suggestions and autocomplete in Void Music.
 /// Supports both minimal text-based queries and advanced entity-based visual suggestions.
 package component:search-suggestion-provider;
 

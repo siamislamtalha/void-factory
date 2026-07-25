@@ -1,6 +1,6 @@
 //! apple-music-importer — BEX content-importer plugin
 //!
-//! Imports Apple Music playlists and albums into Bloomee.
+//! Imports Apple Music playlists and albums into Void Music.
 //! Uses the public Apple Music Catalog API with the developer JWT sourced from
 //! the Apple Music web player JavaScript bundle — no authentication required.
 //!

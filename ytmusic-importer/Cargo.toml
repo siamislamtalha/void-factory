@@ -2,7 +2,7 @@
 name = "ytmusic-importer"
 version = "0.1.0"
 edition = "2021"
-description = "Import YouTube and YouTube Music playlists/albums into Bloomee"
+description = "Import YouTube and YouTube Music playlists/albums into Void Music"
 
 [dependencies]
 bex-core = { path = "bex-core", features = ["importer"] }

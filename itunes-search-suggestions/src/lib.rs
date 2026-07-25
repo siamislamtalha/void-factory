@@ -14,7 +14,7 @@ use bex_core::suggestion::{
 use bex_core::suggestion::ext::http;
 use serde::Deserialize;
 
-const USER_AGENT: &str = "Bloomee/1.0 (bloomee-app)";
+const USER_AGENT: &str = "Void Music/1.0 (void-music-app)";
 const ITUNES_SEARCH: &str = "https://itunes.apple.com/search";
 const APPLE_RSS: &str = "https://rss.applemarketingtools.com/api/v2/us/music/most-played";
 

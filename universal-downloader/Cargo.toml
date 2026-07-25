@@ -1,0 +1,23 @@
+[package]
+name = "universal-downloader"
+version = "1.0.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+bex-core = { path = "./bex-core" }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+anyhow = "1.0"
+reqwest = { version = "0.11", features = ["json", "gzip", "brotli", "deflate"] }
+tokio = { version = "1.0", features = ["full"] }
+base64 = "0.21"
+hex = "0.4"
+des = "0.8"
+lazy_static = "1.4"
+
+[profile.release]
+opt-level = "s"
+lto = true

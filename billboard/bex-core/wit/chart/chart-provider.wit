@@ -1,5 +1,5 @@
 /// @package component:chart-provider
-/// @description Standard interface for music charts and trends in Bloomee.
+/// @description Standard interface for music charts and trends in Void Music.
 /// This interface handles chart listings, item rankings, and trend data.
 package component:chart-provider;
 

@@ -1,5 +1,5 @@
 /// @package component:scrobbler
-/// @description Standard interface for scrobbling and play tracking in Bloomee.
+/// @description Standard interface for scrobbling and play tracking in Void Music.
 /// This interface handles user authentication and playback event synchronization.
 package component:scrobbler;
 

@@ -24,7 +24,7 @@ use serde::Deserialize;
 // ── Constants ──────────────────────────────────────────────────────────────────
 
 /// MANDATORY per MusicBrainz TOS.  Format: "AppName/Version (contact)"
-const MB_UA: &str = "Bloomee/1.0 (bloomee-plugin; contact@bloomee.app)";
+const MB_UA: &str = "Void Music/1.0 (void-music-plugin; contact@voidmusic.app)";
 const MB_BASE: &str = "https://musicbrainz.org/ws/2";
 const CAA_BASE: &str = "https://coverartarchive.org";
 const STORAGE_LAST_REQ: &str = "mb-suggest:last_req_ts";

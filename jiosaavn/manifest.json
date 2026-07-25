@@ -5,7 +5,7 @@
   "version": "2",
   "type": "content-resolver",
   "thumbnail_url": "https://www.jiosaavn.com/favicon.ico",
-  "publisher": { "name": "bloomfactory" },
+  "publisher": { "name": "Void Music" },
   "description": "Jiosaavn based content provider.",
   "resolver": true,
   "country_allowlist": ["IN"],

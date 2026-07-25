@@ -2,7 +2,7 @@
 name = "bex-core"
 version = "0.1.0"
 edition = "2021"
-description = "Core SDK for building Bloomee Extensions (BEX)"
+description = "Core SDK for building Void Music Extensions (BEX)"
 license = "MIT"
 
 [dependencies]

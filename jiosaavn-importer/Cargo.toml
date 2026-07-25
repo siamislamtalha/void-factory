@@ -2,7 +2,7 @@
 name = "jiosaavn-importer"
 version = "0.1.0"
 edition = "2021"
-description = "Import JioSaavn playlists and albums into Bloomee"
+description = "Import JioSaavn playlists and albums into Void Music"
 
 [dependencies]
 bex-core = { path = "bex-core", features = ["importer"] }

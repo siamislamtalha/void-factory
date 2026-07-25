@@ -1,6 +1,6 @@
 /// @package component:content-importer
 /// @description Standard interface for importing music metadata from external sources
-/// (Spotify, YT Music, YouTube, etc.) — intended for fuzzy-matching into Bloomee.
+/// (Spotify, YT Music, YouTube, etc.) — intended for fuzzy-matching into Void Music.
 package component:content-importer;
 
 interface utils {
@@ -76,7 +76,7 @@ interface importer {
     /// Fetches collection metadata for UI preview before import begins.
     get-collection-info: func(url: string) -> result<collection-summary, string>;
 
-    /// Fetches all track metadata for fuzzy matching into Bloomee.
+    /// Fetches all track metadata for fuzzy matching into Void Music.
     get-tracks: func(url: string) -> result<tracks, string>;
 }
 

@@ -1,5 +1,5 @@
 /// @package component:content-resolver
-/// @description Standard interface for music content resolution in Bloomee.
+/// @description Standard interface for music content resolution in Void Music.
 /// This interface handles track metadata, search, albums, artists, and discovery.
 package component:content-resolver;
 
