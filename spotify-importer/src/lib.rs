@@ -365,7 +365,14 @@ fn extract_client_id_from_web() -> Option<String> {
 }
 
 fn token_from_client_credentials() -> Option<AccessToken> {
-    // Try dynamic client ID extraction first
+    // Try hardcoded Basic auth first (most reliable)
+    let auth = "Basic YThmZWM5OWZjMDVjNDZlMTllYjliMWVmMTkyYmU4ZjA6ZWRkYjNkZDM3OTIwNDY3ZTkwYjNhNjIzMzhiNjI3MTQ=";
+    let body = String::from("grant_type=client_credentials");
+    if let Some(token) = try_client_credentials_with_auth(&auth, &body) {
+        return Some(token);
+    }
+
+    // Try dynamic client ID extraction
     if let Some(client_id) = extract_client_id_from_web() {
         if let Some(token) = try_client_credentials(&client_id, "") {
             return Some(token);
@@ -386,6 +393,28 @@ fn token_from_client_credentials() -> Option<AccessToken> {
     }
 
     None
+}
+
+fn try_client_credentials_with_auth(auth: &str, body: &str) -> Option<AccessToken> {
+    let resp = http::post("https://accounts.spotify.com/api/token")
+        .header("Content-Type", "application/x-www-form-urlencoded")
+        .header("Accept", "application/json")
+        .header("Authorization", auth)
+        .body(body.as_bytes().to_vec())
+        .timeout(20)
+        .send()
+        .ok()?;
+
+    if !(200..300).contains(&resp.status) {
+        return None;
+    }
+
+    let text = String::from_utf8(resp.body).ok()?;
+    let data: Value = serde_json::from_str(&text).ok()?;
+    let token = data.get("access_token")?.as_str()?.to_string();
+    let expires_in = data.get("expires_in").and_then(Value::as_u64);
+    let expires_at = expires_in.map(|sec| time::now() + sec);
+    Some(AccessToken { token, expires_at })
 }
 
 fn try_client_credentials(client_id: &str, client_secret: &str) -> Option<AccessToken> {
