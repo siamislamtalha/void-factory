@@ -62,7 +62,7 @@ fn innertube_browse(url: &str, client_name: &str, client_version: &str, browse_i
         .header("Referer", &format!("{origin}/"))
         .header("Accept-Language", "en-US,en;q=0.9")
         .body(body.into_bytes())
-        .timeout(30)
+        .timeout(15)
         .send()
         .map_err(|e| e.to_string())?;
     if resp.status < 200 || resp.status >= 300 {
@@ -98,7 +98,7 @@ fn innertube_continue_at(
         .header("Referer", &format!("{origin}/"))
         .header("Accept-Language", "en-US,en;q=0.9")
         .body(body.into_bytes())
-        .timeout(30)
+        .timeout(15)
         .send()
         .map_err(|e| e.to_string())?;
     if resp.status < 200 || resp.status >= 300 {

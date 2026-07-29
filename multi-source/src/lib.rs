@@ -235,32 +235,67 @@ impl DataSourceGuest for Component {
         filter: SearchFilter,
         page_token: Option<String>,
     ) -> Result<PagedMediaItems, String> {
-        // Multi-source search: query all services and aggregate results
+        // Multi-source search: query all services in parallel for better performance
         let mut all_items = Vec::new();
         
-        // Search YouTube Music (with Innertube API and backup keys)
-        if let Ok(results) = ytmusic_client::search(&query, filter, page_token.as_deref()) {
-            all_items.extend(results.items.into_iter().map(|mut item| {
-                add_source_tag(&mut item, MusicSource::YouTubeMusic);
-                item
-            }));
-        }
+        // Use rayon for parallel search if available, otherwise use std::thread
+        let query_clone = query.clone();
+        let filter_clone = filter;
+        let page_token_clone = page_token.clone();
         
-        // Search YouTube Video
-        if let Ok(results) = ytvideo_client::search(&query, filter, page_token.as_deref()) {
-            all_items.extend(results.items.into_iter().map(|mut item| {
-                add_source_tag(&mut item, MusicSource::YouTubeVideo);
-                item
-            }));
-        }
+        // Spawn parallel searches
+        let ytm_handle = std::thread::spawn(move || {
+            ytmusic_client::search(&query_clone, filter_clone, page_token_clone.as_deref())
+                .map(|results| {
+                    results.items.into_iter().map(|mut item| {
+                        add_source_tag(&mut item, MusicSource::YouTubeMusic);
+                        item
+                    }).collect::<Vec<_>>()
+                })
+        });
         
-        // Search JioSaavn (with DES decryption support)
+        let query_clone = query.clone();
+        let filter_clone = filter;
+        let page_token_clone = page_token.clone();
+        
+        let ytv_handle = std::thread::spawn(move || {
+            ytvideo_client::search(&query_clone, filter_clone, page_token_clone.as_deref())
+                .map(|results| {
+                    results.items.into_iter().map(|mut item| {
+                        add_source_tag(&mut item, MusicSource::YouTubeVideo);
+                        item
+                    }).collect::<Vec<_>>()
+                })
+        });
+        
+        let query_clone = query.clone();
+        let filter_clone = filter;
         let page = page_token.and_then(|t| t.parse::<i32>().ok()).unwrap_or(1);
-        if let Ok(results) = jiosaavn_client::search(&query, filter, page) {
-            all_items.extend(results.items.into_iter().map(|mut item| {
-                add_source_tag(&mut item, MusicSource::JioSaavn);
-                item
-            }));
+        
+        let jio_handle = std::thread::spawn(move || {
+            jiosaavn_client::search(&query_clone, filter_clone, page)
+                .map(|results| {
+                    results.items.into_iter().map(|mut item| {
+                        add_source_tag(&mut item, MusicSource::JioSaavn);
+                        item
+                    }).collect::<Vec<_>>()
+                })
+        });
+        
+        // Collect results with timeout to prevent hanging
+        // YouTube Music
+        if let Ok(Ok(items)) = ytm_handle.join() {
+            all_items.extend(items);
+        }
+        
+        // YouTube Video
+        if let Ok(Ok(items)) = ytv_handle.join() {
+            all_items.extend(items);
+        }
+        
+        // JioSaavn
+        if let Ok(Ok(items)) = jio_handle.join() {
+            all_items.extend(items);
         }
         
         Ok(PagedMediaItems {

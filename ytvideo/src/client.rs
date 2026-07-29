@@ -338,7 +338,7 @@ fn yt_post_to_url(
         method: utils::HttpMethod::Post,
         headers: Some(headers),
         body: Some(body_str.into_bytes()),
-        timeout_seconds: Some(30),
+        timeout_seconds: Some(15),
     };
     let resp = utils::http_request(full_url, &options)
         .map_err(|e| anyhow::anyhow!("HTTP request failed: {e}"))?;
@@ -389,7 +389,7 @@ fn try_yt_post_with_key(endpoint: &str, body_str: &str, api_key: &str) -> Result
             ("Referer".into(), "https://www.youtube.com/".into()),
         ]),
         body: Some(body_str.as_bytes().to_vec()),
-        timeout_seconds: Some(30),
+        timeout_seconds: Some(15),
     };
     let resp = utils::http_request(&url, &options)
         .map_err(|e| anyhow::anyhow!("HTTP request failed: {e}"))?;

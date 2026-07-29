@@ -208,7 +208,7 @@ fn fetch_html(url: &str) -> Result<String, String> {
             ("Accept-Language".to_string(), "en-US,en;q=0.9".to_string()),
         ]),
         body: None,
-        timeout_seconds: Some(40),
+        timeout_seconds: Some(20),
     };
 
     let response = http_request(url, &options)

@@ -26,9 +26,9 @@ struct YouTubeClient {
 impl YouTubeClient {
     fn android_vr() -> Self {
         Self {
-            client_name: "21".to_string(),
-            client_version: "1.56.1002".to_string(),
-            user_agent: "com.google.android.apps.youtube.vr.oculus/1.56.1002 (Lollipop; VR) gzip".to_string(),
+            client_name: "28".to_string(),
+            client_version: "1.71.26".to_string(),
+            user_agent: "com.google.android.apps.youtube.vr.oculus/1.71.26 (Linux; U; Android 12L; eureka-user Build/SQ3A.220605.009.A1) gzip".to_string(),
             referer: Some("https://www.youtube.com/".to_string()),
         }
     }
@@ -36,8 +36,8 @@ impl YouTubeClient {
     fn ios() -> Self {
         Self {
             client_name: "5".to_string(),
-            client_version: "19.09.3".to_string(),
-            user_agent: "com.google.ios.youtube/19.09.3 (iPhone14,3; U; CPU iOS 15_6 like Mac OS X)".to_string(),
+            client_version: "20.10.4".to_string(),
+            user_agent: "com.google.ios.youtube/20.10.4 (iPhone16,2; U; CPU iOS 18_3 like Mac OS X)".to_string(),
             referer: Some("https://www.youtube.com/".to_string()),
         }
     }
@@ -45,7 +45,7 @@ impl YouTubeClient {
     fn tvhtml5() -> Self {
         Self {
             client_name: "7".to_string(),
-            client_version: "7.20231204".to_string(),
+            client_version: "7.20260114.12.00".to_string(),
             user_agent: "Mozilla/5.0 (ChromiumStyle; Linux) SmartTV/1.0".to_string(),
             referer: Some("https://www.youtube.com/tv".to_string()),
         }
@@ -54,8 +54,8 @@ impl YouTubeClient {
     fn web_remix() -> Self {
         Self {
             client_name: "67".to_string(),
-            client_version: "1.20231128.07.00".to_string(),
-            user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36".to_string(),
+            client_version: "1.20260222.01.00".to_string(),
+            user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36".to_string(),
             referer: Some("https://music.youtube.com/".to_string()),
         }
     }
@@ -156,8 +156,8 @@ impl YouTubeDownloader {
             YouTubeClient::web_remix(),
         ];
 
-        for client in clients {
-            match self.get_stream_url_with_client(video_id, &client) {
+        for (attempt, client) in clients.iter().enumerate() {
+            match self.get_stream_url_with_client_retry(video_id, client, attempt) {
                 Ok(url) => return Ok(url),
                 Err(e) => {
                     let _ = format!("Client {:?} failed: {}", client.client_name, e);
@@ -169,14 +169,34 @@ impl YouTubeDownloader {
         Err(anyhow!("All YouTube clients failed"))
     }
 
+    fn get_stream_url_with_client_retry(&self, video_id: &str, client: &YouTubeClient, attempt: usize) -> Result<String> {
+        // Simple retry with exponential backoff
+        let max_retries = 2;
+        for retry in 0..=max_retries {
+            match self.get_stream_url_with_client(video_id, client) {
+                Ok(url) => return Ok(url),
+                Err(e) => {
+                    if retry < max_retries {
+                        // Exponential backoff: 100ms, 200ms, 400ms
+                        let delay_ms = 100 * (1 << retry);
+                        std::thread::sleep(std::time::Duration::from_millis(delay_ms));
+                    }
+                }
+            }
+        }
+        Err(anyhow!("Client {:?} failed after retries", client.client_name))
+    }
+
     fn get_stream_url_with_client(&self, video_id: &str, client: &YouTubeClient) -> Result<String> {
+        // Don't use hardcoded visitor data - it can become stale and cause 403 errors
+        // YouTube will work without it for most content
         let context = PlayerRequestContext {
             client: YouTubeClientContext {
                 client_name: client.client_name.clone(),
                 client_version: client.client_version.clone(),
                 language: "en".to_string(),
                 country: "US".to_string(),
-                visitor_data: Some("CgtsZG1ySnZiQWtSbyiMjuGSBg%3D%3D".to_string()),
+                visitor_data: None,
             },
         };
 

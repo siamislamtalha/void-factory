@@ -92,7 +92,7 @@ impl HttpDownloader {
                 ),
             ]),
             body: None,
-            timeout_seconds: Some(30),
+            timeout_seconds: Some(15),
         };
 
         let response = http_request(url, &options).map_err(|e| anyhow!("HTTP request failed: {}", e))?;

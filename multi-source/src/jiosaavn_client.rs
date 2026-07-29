@@ -99,7 +99,7 @@ fn make_request_with_ctx(params: &str, use_v4: bool, ctx: &str) -> Result<String
         method: HttpMethod::Get,
         headers: Some(get_headers()),
         body: None,
-        timeout_seconds: Some(30),
+        timeout_seconds: Some(15),
     };
 
     let response =

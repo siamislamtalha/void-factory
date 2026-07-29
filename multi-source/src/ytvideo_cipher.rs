@@ -207,7 +207,7 @@ fn http_get(url: &str) -> Result<String, String> {
                 .to_string(),
         )]),
         body: None,
-        timeout_seconds: Some(30),
+        timeout_seconds: Some(15),
     };
     let resp = utils::http_request(url, &options).map_err(|e| format!("HTTP GET failed: {e}"))?;
 
