@@ -16,7 +16,7 @@ use serde::Deserialize;
 
 const USER_AGENT: &str = "Void Music/1.0 (void-music-app)";
 const ITUNES_SEARCH: &str = "https://itunes.apple.com/search";
-const APPLE_RSS: &str = "https://rss.applemarketingtools.com/api/v2/us/music/most-played";
+const APPLE_RSS: &str = "https://rss.applemarketingtools.com/api/v2/us/music/most-played"; // Using US as fallback, but iTunes search now unrestricted
 
 // ── Plugin entry-point ─────────────────────────────────────────────────────────
 
@@ -34,7 +34,7 @@ impl Guest for Component {
         let enc_query = urlencoding::encode(&query).to_string();
 
         let url = format!(
-            "{ITUNES_SEARCH}?term={enc_query}&media=music&entity={entity_str}&limit={limit}&lang=en_us&country=us"
+            "{ITUNES_SEARCH}?term={enc_query}&media=music&entity={entity_str}&limit={limit}"
         );
 
         let resp = http::get(&url)

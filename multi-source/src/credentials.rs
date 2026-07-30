@@ -140,6 +140,11 @@ impl ServerRotator {
     pub fn count(&self) -> usize {
         self.servers.len()
     }
+
+    /// Get reference to servers vector.
+    pub fn servers(&self) -> &Vec<String> {
+        &self.servers
+    }
 }
 
 /// Global YouTube API key rotator.

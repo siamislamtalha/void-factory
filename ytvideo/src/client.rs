@@ -32,7 +32,7 @@ const BACKUP_API_KEYS: &[&str] = &[
 ];
 
 const CLIENT_NAME: &str = "WEB";
-const CLIENT_VERSION: &str = "2.20240306.01.00";
+const CLIENT_VERSION: &str = "2.20260222.01.00";
 const USER_AGENT: &str =
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36";
 
@@ -395,9 +395,24 @@ fn try_yt_post_with_key(endpoint: &str, body_str: &str, api_key: &str) -> Result
         .map_err(|e| anyhow::anyhow!("HTTP request failed: {e}"))?;
 
     if resp.status < 200 || resp.status >= 300 {
+        // Try to parse error response for more details
+        let error_msg = if let Ok(text) = String::from_utf8(resp.body.clone()) {
+            if let Ok(json) = serde_json::from_str::<Value>(&text) {
+                json.get("error")
+                    .and_then(|e| e.get("message"))
+                    .and_then(|m| m.as_str())
+                    .unwrap_or(&format!("HTTP {}", resp.status))
+                    .to_string()
+            } else {
+                format!("HTTP {}", resp.status)
+            }
+        } else {
+            format!("HTTP {}", resp.status)
+        };
         return Err(anyhow::anyhow!(
-            "YT API returned status {} for {endpoint}",
-            resp.status
+            "YT API returned status {} for {endpoint}: {}",
+            resp.status,
+            error_msg
         ));
     }
 

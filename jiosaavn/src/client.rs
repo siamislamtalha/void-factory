@@ -16,12 +16,117 @@ use crate::types::{JioResponse, SearchResponse};
 use anyhow::{anyhow, Result};
 use serde_json::Value;
 use urlencoding::encode;
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::Arc;
 
-const BASE_URL: &str = "https://www.jiosaavn.com/api.php";
+// Credentials from multi-source (Echo-Music APK reference)
+const DES_KEY: &[u8; 8] = b"38346591";
+const REMOTE_CONFIG_URL: &str = "https://echomusic.fun/saavn.json";
+const BASE_DOMAIN: &str = "www.jiosaavn.com";
 const API_VERSION: &str = "4";
 const CTX: &str = "web6dot0";
 const CTX_ANDROID: &str = "android";
 const DETAILS_PAGE_SIZE: usize = 20;
+
+// Default servers (fallback if remote config fails)
+const DEFAULT_SERVERS: &[&str] = &[
+    "saavn.echomusic.fun",
+    "saavn1.echomusic.fun",
+    "saavn2.echomusic.fun",
+];
+
+// Server rotator for high availability
+struct ServerRotator {
+    servers: Vec<String>,
+    current_index: Arc<AtomicUsize>,
+    use_direct: bool,
+}
+
+impl ServerRotator {
+    fn new() -> Self {
+        // Try to fetch remote config first
+        let servers = Self::fetch_remote_servers().unwrap_or_else(|_| {
+            DEFAULT_SERVERS.iter().map(|s| s.to_string()).collect()
+        });
+
+        Self {
+            servers,
+            current_index: Arc::new(AtomicUsize::new(0)),
+            use_direct: servers.is_empty(),
+        }
+    }
+
+    fn fetch_remote_servers() -> Result<Vec<String>> {
+        let options = RequestOptions {
+            method: HttpMethod::Get,
+            headers: Some(vec![
+                ("Accept".to_string(), "application/json".to_string()),
+                ("User-Agent".to_string(), "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36".to_string()),
+            ]),
+            body: None,
+            timeout_seconds: Some(10),
+        };
+
+        let resp = http_request(REMOTE_CONFIG_URL, &options)
+            .map_err(|e| anyhow!("Failed to fetch remote config: {}", e))?;
+
+        if resp.status != 200 {
+            return Err(anyhow!("Remote config returned status {}", resp.status));
+        }
+
+        let body = String::from_utf8(resp.body)
+            .map_err(|e| anyhow!("Failed to decode response: {}", e))?;
+
+        let json: Value = serde_json::from_str(&body)
+            .map_err(|e| anyhow!("Failed to parse JSON: {}", e))?;
+
+        let servers = json.get("servers")
+            .and_then(|s| s.as_array())
+            .ok_or_else(|| anyhow!("No servers in remote config"))?;
+
+        let server_list: Vec<String> = servers.iter()
+            .filter_map(|s| s.as_str())
+            .map(|s| s.to_string())
+            .collect();
+
+        if server_list.is_empty() {
+            return Err(anyhow!("Empty server list in remote config"));
+        }
+
+        Ok(server_list)
+    }
+
+    fn current(&self) -> &str {
+        if self.use_direct {
+            BASE_DOMAIN
+        } else {
+            let index = self.current_index.load(Ordering::Relaxed);
+            &self.servers[index % self.servers.len()]
+        }
+    }
+
+    fn rotate(&self) -> &str {
+        if self.use_direct {
+            BASE_DOMAIN
+        } else {
+            let index = self.current_index.fetch_add(1, Ordering::Relaxed);
+            &self.servers[index % self.servers.len()]
+        }
+    }
+
+    fn reset(&self) {
+        self.current_index.store(0, Ordering::Relaxed);
+    }
+}
+
+lazy_static::lazy_static! {
+    static ref SERVER_ROTATOR: ServerRotator = ServerRotator::new();
+}
+
+fn get_base_url() -> String {
+    let server = SERVER_ROTATOR.current();
+    format!("https://{}/api.php", server)
+}
 
 fn parse_page_token(page_token: &str) -> Result<usize> {
     let page = page_token
@@ -88,31 +193,52 @@ fn make_request_android(params: &str, use_v4: bool) -> Result<String> {
 }
 
 fn make_request_with_ctx(params: &str, use_v4: bool, ctx: &str) -> Result<String> {
-    let mut url = format!("{}?_format=json&_marker=0&ctx={}", BASE_URL, ctx);
-    if use_v4 {
-        url.push_str(&format!("&api_version={}", API_VERSION));
-    }
-    url.push_str("&");
-    url.push_str(params);
-
     let options = RequestOptions {
         method: HttpMethod::Get,
         headers: Some(get_headers()),
         body: None,
-        timeout_seconds: Some(15),
+        timeout_seconds: Some(30),
     };
 
-    let response =
-        http_request(&url, &options).map_err(|e| anyhow!("HTTP request failed: {}", e))?;
+    // Try direct API first (PRIMARY - old simple approach)
+    let mut direct_url = format!("https://{}/api.php?_format=json&_marker=0&ctx={}", BASE_DOMAIN, ctx);
+    if use_v4 {
+        direct_url.push_str(&format!("&api_version={}", API_VERSION));
+    }
+    direct_url.push_str("&");
+    direct_url.push_str(params);
 
-    if response.status != 200 {
-        return Err(anyhow!("API returned status {}", response.status));
+    let response = http_request(&direct_url, &options);
+
+    if let Ok(resp) = response {
+        if resp.status == 200 {
+            let body = String::from_utf8(resp.body)
+                .map_err(|e| anyhow!("Failed to decode response body: {}", e))?;
+            return Ok(body);
+        }
     }
 
-    let body = String::from_utf8(response.body)
-        .map_err(|e| anyhow!("Failed to decode response body: {}", e))?;
+    // Direct failed, try fallback proxy servers (FALLBACK - new feature)
+    if !SERVER_ROTATOR.servers.is_empty() {
+        let fallback_server = SERVER_ROTATOR.rotate();
+        let mut fallback_url = format!("https://{}/api.php?_format=json&_marker=0&ctx={}", fallback_server, ctx);
+        if use_v4 {
+            fallback_url.push_str(&format!("&api_version={}", API_VERSION));
+        }
+        fallback_url.push_str("&");
+        fallback_url.push_str(params);
 
-    Ok(body)
+        let retry_response = http_request(&fallback_url, &options)
+            .map_err(|e| anyhow!("HTTP request failed (fallback): {}", e))?;
+
+        if retry_response.status == 200 {
+            let body = String::from_utf8(retry_response.body)
+                .map_err(|e| anyhow!("Failed to decode response body: {}", e))?;
+            return Ok(body);
+        }
+    }
+
+    Err(anyhow!("API request failed - both direct and fallback servers unavailable"))
 }
 
 fn parse_response_value(json_str: &str) -> Result<Value> {

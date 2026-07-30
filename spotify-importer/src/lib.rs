@@ -365,29 +365,27 @@ fn extract_client_id_from_web() -> Option<String> {
 }
 
 fn token_from_client_credentials() -> Option<AccessToken> {
-    // Try hardcoded Basic auth first (most reliable)
+    // Primary credentials from BlackHole APK reference (multi-source)
+    let primary_credentials = [
+        ("08de4eaf71904d1b95254fab3015d711", "622b4fbad33947c59b95a6ae607de11d"),
+    ];
+
+    for (client_id, client_secret) in primary_credentials {
+        if let Some(token) = try_client_credentials(client_id, client_secret) {
+            return Some(token);
+        }
+    }
+
+    // Try hardcoded Basic auth as fallback
     let auth = "Basic YThmZWM5OWZjMDVjNDZlMTllYjliMWVmMTkyYmU4ZjA6ZWRkYjNkZDM3OTIwNDY3ZTkwYjNhNjIzMzhiNjI3MTQ=";
     let body = String::from("grant_type=client_credentials");
     if let Some(token) = try_client_credentials_with_auth(&auth, &body) {
         return Some(token);
     }
 
-    // Try dynamic client ID extraction
+    // Try dynamic client ID extraction as last resort
     if let Some(client_id) = extract_client_id_from_web() {
         if let Some(token) = try_client_credentials(&client_id, "") {
-            return Some(token);
-        }
-    }
-
-    // Fallback to hardcoded backup credentials from APK reference
-    // These serve as backup when dynamic extraction fails
-    let backup_credentials = [
-        ("4ede44382bf14ac3ba1d97ad753b233f", "fb01ad204aff4c12bbcb3ca7ac617990"),
-        ("a8b4dc5d64e74ae48ee7d1a6d9b0c3f2", "c9f2a3b1e7d5e8f4a6c2d8b3e5f1a7c9"),
-    ];
-
-    for (client_id, client_secret) in backup_credentials {
-        if let Some(token) = try_client_credentials(client_id, client_secret) {
             return Some(token);
         }
     }

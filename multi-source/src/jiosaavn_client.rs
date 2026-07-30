@@ -88,31 +88,53 @@ fn make_request_android(params: &str, use_v4: bool) -> Result<String> {
 }
 
 fn make_request_with_ctx(params: &str, use_v4: bool, ctx: &str) -> Result<String> {
-    let mut url = format!("{}?_format=json&_marker=0&ctx={}", BASE_URL, ctx);
-    if use_v4 {
-        url.push_str(&format!("&api_version={}", API_VERSION));
-    }
-    url.push_str("&");
-    url.push_str(params);
-
     let options = RequestOptions {
         method: HttpMethod::Get,
         headers: Some(get_headers()),
         body: None,
-        timeout_seconds: Some(15),
+        timeout_seconds: Some(30),
     };
 
-    let response =
-        http_request(&url, &options).map_err(|e| anyhow!("HTTP request failed: {}", e))?;
+    // Try direct API first (PRIMARY - old simple approach)
+    let mut direct_url = format!("{}?_format=json&_marker=0&ctx={}", BASE_URL, ctx);
+    if use_v4 {
+        direct_url.push_str(&format!("&api_version={}", API_VERSION));
+    }
+    direct_url.push_str("&");
+    direct_url.push_str(params);
 
-    if response.status != 200 {
-        return Err(anyhow!("API returned status {}", response.status));
+    let response = http_request(&direct_url, &options);
+
+    if let Ok(resp) = response {
+        if resp.status == 200 {
+            let body = String::from_utf8(resp.body)
+                .map_err(|e| anyhow!("Failed to decode response body: {}", e))?;
+            return Ok(body);
+        }
     }
 
-    let body = String::from_utf8(response.body)
-        .map_err(|e| anyhow!("Failed to decode response body: {}", e))?;
+    // Direct failed, try fallback proxy servers (FALLBACK - server rotator feature)
+    let rotator = crate::credentials::jiosaavn_server_rotator();
+    if !rotator.servers().is_empty() {
+        let fallback_server = rotator.rotate();
+        let mut fallback_url = format!("https://{}/api.php?_format=json&_marker=0&ctx={}", fallback_server, ctx);
+        if use_v4 {
+            fallback_url.push_str(&format!("&api_version={}", API_VERSION));
+        }
+        fallback_url.push_str("&");
+        fallback_url.push_str(params);
 
-    Ok(body)
+        let retry_response = http_request(&fallback_url, &options)
+            .map_err(|e| anyhow!("HTTP request failed (fallback): {}", e))?;
+
+        if retry_response.status == 200 {
+            let body = String::from_utf8(retry_response.body)
+                .map_err(|e| anyhow!("Failed to decode response body: {}", e))?;
+            return Ok(body);
+        }
+    }
+
+    Err(anyhow!("API request failed - both direct and fallback servers unavailable"))
 }
 
 fn parse_response_value(json_str: &str) -> Result<Value> {

@@ -73,11 +73,11 @@ fn innertube_browse(url: &str, client_name: &str, client_version: &str, browse_i
 }
 
 fn innertube_continue(continuation_token: &str) -> Result<Value, String> {
-    innertube_continue_at(continuation_token, YT_URL, "WEB", "2.20231219.01.00")
+    innertube_continue_at(continuation_token, YT_URL, "WEB", "2.20260222.01.00")
 }
 
 fn innertube_continue_ytm(continuation_token: &str) -> Result<Value, String> {
-    innertube_continue_at(continuation_token, YTM_URL, "WEB_REMIX", "1.20241212.01.00")
+    innertube_continue_at(continuation_token, YTM_URL, "WEB_REMIX", "1.20260222.01.00")
 }
 
 fn innertube_continue_at(
@@ -176,7 +176,7 @@ fn extract_yt_tracks_from_arr(arr: &[Value]) -> Vec<TrackItem> {
 
 fn get_all_yt_playlist_tracks(playlist_id: &str) -> Result<Vec<TrackItem>, String> {
     let browse_id = format!("VL{playlist_id}");
-    let data = innertube_browse(YT_URL, "WEB", "2.20231219.01.00", &browse_id)?;
+    let data = innertube_browse(YT_URL, "WEB", "2.20260222.01.00", &browse_id)?;
 
     let mut tracks = playlist_contents(&data)
         .map(|c| extract_yt_tracks_from_arr(c))
@@ -203,7 +203,7 @@ fn get_all_yt_playlist_tracks(playlist_id: &str) -> Result<Vec<TrackItem>, Strin
 
 fn get_yt_playlist_info(playlist_id: &str) -> Result<CollectionSummary, String> {
     let browse_id = format!("VL{playlist_id}");
-    let data = innertube_browse(YT_URL, "WEB", "2.20231219.01.00", &browse_id)?;
+    let data = innertube_browse(YT_URL, "WEB", "2.20260222.01.00", &browse_id)?;
 
     let header = data.pointer("/header/playlistHeaderRenderer");
 
@@ -271,7 +271,7 @@ fn get_yt_playlist_info(playlist_id: &str) -> Result<CollectionSummary, String> 
 // ── YouTube Music album helpers ───────────────────────────────────────────────
 
 fn get_ytm_album_info(browse_id: &str) -> Result<CollectionSummary, String> {
-    let data = innertube_browse(YTM_URL, "WEB_REMIX", "1.20241212.01.00", browse_id)?;
+    let data = innertube_browse(YTM_URL, "WEB_REMIX", "1.20260222.01.00", browse_id)?;
 
     // Header is in tabs[0] > sectionListRenderer > contents[0] > musicResponsiveHeaderRenderer
     let header_path = "/contents/twoColumnBrowseResultsRenderer/tabs/0/tabRenderer/content\
@@ -335,7 +335,7 @@ fn extract_ytm_continuation_token(arr: &[Value]) -> Option<String> {
 }
 
 fn get_ytm_album_tracks(browse_id: &str) -> Result<Vec<TrackItem>, String> {
-    let data = innertube_browse(YTM_URL, "WEB_REMIX", "1.20241212.01.00", browse_id)?;
+    let data = innertube_browse(YTM_URL, "WEB_REMIX", "1.20260222.01.00", browse_id)?;
 
     // Try singleColumnBrowseResultsRenderer (older album pages)
     let shelf = data

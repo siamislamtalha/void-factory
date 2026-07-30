@@ -1,7 +1,7 @@
 //! jiosaavn-importer — BEX content-importer plugin
 //!
 //! Imports JioSaavn playlists and albums into Void Music.
-//! Uses the public JioSaavn JSON API — no authentication required.
+//! Uses the public JioSaavn JSON API with server rotation for high availability.
 //!
 //! Supported URL formats:
 //!   jiosaavn.com/s/playlist/{name}/{token}       — user playlist
@@ -13,8 +13,101 @@ use bex_core::importer::{
     ext::http, CollectionSummary, CollectionType, Guest, TrackItem, Tracks,
 };
 use serde_json::Value;
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::Arc;
 
 struct Component;
+
+// Credentials from multi-source (Echo-Music APK reference)
+const REMOTE_CONFIG_URL: &str = "https://echomusic.fun/saavn.json";
+const BASE_DOMAIN: &str = "www.jiosaavn.com";
+const API_VERSION: &str = "4";
+const CTX: &str = "web6dot0";
+
+// Default servers (fallback if remote config fails)
+const DEFAULT_SERVERS: &[&str] = &[
+    "saavn.echomusic.fun",
+    "saavn1.echomusic.fun",
+    "saavn2.echomusic.fun",
+];
+
+// Server rotator for high availability
+struct ServerRotator {
+    servers: Vec<String>,
+    current_index: Arc<AtomicUsize>,
+    use_direct: bool,
+}
+
+impl ServerRotator {
+    fn new() -> Self {
+        // Fetch remote config for fallback servers
+        let servers = Self::fetch_remote_servers().unwrap_or_else(|_| {
+            DEFAULT_SERVERS.iter().map(|s| s.to_string()).collect()
+        });
+
+        Self {
+            servers,
+            current_index: Arc::new(AtomicUsize::new(0)),
+            use_direct: false, // Always have fallback servers available
+        }
+    }
+
+    fn fetch_remote_servers() -> Result<Vec<String>, String> {
+        let resp = http::get(REMOTE_CONFIG_URL)
+            .header("Accept", "application/json")
+            .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+            .timeout(10)
+            .send()
+            .map_err(|e| format!("Failed to fetch remote config: {}", e))?;
+
+        if resp.status != 200 {
+            return Err(format!("Remote config returned status {}", resp.status));
+        }
+
+        let body = String::from_utf8(resp.body)
+            .map_err(|e| format!("Failed to decode response: {}", e))?;
+
+        let json: Value = serde_json::from_str(&body)
+            .map_err(|e| format!("Failed to parse JSON: {}", e))?;
+
+        let servers = json.get("servers")
+            .and_then(|s| s.as_array())
+            .ok_or_else(|| "No servers in remote config".to_string())?;
+
+        let server_list: Vec<String> = servers.iter()
+            .filter_map(|s| s.as_str())
+            .map(|s| s.to_string())
+            .collect();
+
+        if server_list.is_empty() {
+            return Err("Empty server list in remote config".to_string());
+        }
+
+        Ok(server_list)
+    }
+
+    fn current(&self) -> &str {
+        BASE_DOMAIN // Always use direct as primary
+    }
+
+    fn rotate(&self) -> &str {
+        if self.servers.is_empty() {
+            BASE_DOMAIN
+        } else {
+            let index = self.current_index.fetch_add(1, Ordering::Relaxed);
+            &self.servers[index % self.servers.len()]
+        }
+    }
+}
+
+lazy_static::lazy_static! {
+    static ref SERVER_ROTATOR: ServerRotator = ServerRotator::new();
+}
+
+fn get_base_url() -> String {
+    let server = SERVER_ROTATOR.current();
+    format!("https://{}/api.php", server)
+}
 
 // ── URL parsing ───────────────────────────────────────────────────────────────
 
@@ -54,11 +147,10 @@ fn parse_url(url: &str) -> Option<(JioKind, String)> {
 
 // ── JioSaavn API ──────────────────────────────────────────────────────────────
 
-const BASE: &str = "https://www.jiosaavn.com/api.php";
-
 fn api_call(params: &str) -> Result<Value, String> {
-    let url = format!("{BASE}?_format=json&_marker=0&ctx=web6dot0&api_version=4&{params}");
-    let resp = http::get(&url)
+    // Try direct API first (primary - old reliable method)
+    let direct_url = format!("https://{}/api.php?_format=json&_marker=0&ctx={}&api_version={}&{}", BASE_DOMAIN, CTX, API_VERSION, params);
+    let resp = http::get(&direct_url)
         .header("Accept", "application/json, text/plain, */*")
         .header(
             "User-Agent",
@@ -66,13 +158,33 @@ fn api_call(params: &str) -> Result<Value, String> {
              (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
         )
         .timeout(30)
-        .send()
-        .map_err(|e| e.to_string())?;
-    if resp.status < 200 || resp.status >= 300 {
-        return Err(format!("JioSaavn API HTTP {}", resp.status));
+        .send();
+
+    if let Ok(r) = resp {
+        if r.status >= 200 && r.status < 300 {
+            let text = String::from_utf8(r.body).map_err(|e| e.to_string())?;
+            return serde_json::from_str(&text).map_err(|e| format!("JSON parse error: {e}"));
+        }
     }
-    let text = String::from_utf8(resp.body).map_err(|e| e.to_string())?;
-    serde_json::from_str(&text).map_err(|e| format!("JSON parse error: {e}"))
+
+    // Direct failed, try fallback proxy servers
+    if !SERVER_ROTATOR.servers.is_empty() {
+        let fallback_server = SERVER_ROTATOR.rotate();
+        let fallback_url = format!("https://{}/api.php?_format=json&_marker=0&ctx={}&api_version={}&{}", fallback_server, CTX, API_VERSION, params);
+        let retry_resp = http::get(&fallback_url)
+            .header("Accept", "application/json, text/plain, */*")
+            .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+            .timeout(30)
+            .send()
+            .map_err(|e| format!("Retry failed: {}", e))?;
+
+        if retry_resp.status >= 200 && retry_resp.status < 300 {
+            let text = String::from_utf8(retry_resp.body).map_err(|e| e.to_string())?;
+            return serde_json::from_str(&text).map_err(|e| format!("JSON parse error: {e}"));
+        }
+    }
+
+    Err("JioSaavn API request failed - both direct and fallback servers unavailable".to_string())
 }
 
 // ── Image URL helper ──────────────────────────────────────────────────────────
