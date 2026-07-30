@@ -16,6 +16,10 @@ const DES_KEY: &[u8; 8] = b"38346591";
 /// 3. UTF-8 decode.
 /// 4. Replace .mp4.* with .mp4 and .m4a.* with .m4a.
 /// 5. Replace http: with https:.
+pub fn decrypt_url(input: &str) -> String {
+    decode_media_url(input).unwrap_or_default()
+}
+
 pub fn decode_media_url(input: &str) -> Result<String> {
     // 1. Base64 decode
     let encrypted_bytes = general_purpose::STANDARD

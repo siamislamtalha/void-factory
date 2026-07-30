@@ -136,9 +136,13 @@ pub struct ArtistUrls {
 
 #[derive(Debug, Deserialize)]
 pub struct SearchResponse {
+    pub songs: Option<Vec<JioResponse>>,
+    pub albums: Option<Vec<JioResponse>>,
+    pub artists: Option<Vec<JioResponse>>,
+    pub playlists: Option<Vec<JioResponse>>,
     pub total: Option<i64>,
     pub start: Option<i64>,
-    pub results: Vec<JioResponse>,
+    pub results: Option<Vec<JioResponse>>,
 }
 
 // For home data, sections, etc.
