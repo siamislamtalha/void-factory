@@ -49,10 +49,12 @@ impl ServerRotator {
             DEFAULT_SERVERS.iter().map(|s| s.to_string()).collect()
         });
 
+        let use_direct = servers.is_empty();
+
         Self {
             servers,
             current_index: Arc::new(AtomicUsize::new(0)),
-            use_direct: servers.is_empty(),
+            use_direct,
         }
     }
 
@@ -529,6 +531,7 @@ pub fn search(query: &str, filter: SearchFilter, page: i32) -> Result<PagedMedia
     let items = wrapper
         .results
         .iter()
+        .flat_map(|inner| inner.iter())
         .filter_map(mapper::map_to_media_item)
         .collect();
 
