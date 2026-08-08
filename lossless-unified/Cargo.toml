@@ -23,11 +23,15 @@ md-5 = "0.10"
 sha2 = "0.10"
 aes = "0.8"
 blowfish = "0.9"
-rand = "0.8"
+rand = { version = "0.8", features = ["js"] }
 hmac = "0.12"
 regex = "1.10"
 bytes = "1.5"
 futures-util = "0.3"
+getrandom = { version = "0.2", features = ["js"] }
+wasm-bindgen = "0.2"
+wasm-bindgen-futures = "0.4"
+js-sys = "0.3"
 
 [package.metadata.component]
 package = "component:content-resolver"
