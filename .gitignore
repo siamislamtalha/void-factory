@@ -10,3 +10,6 @@
 Thumbs.db
 .DS_Store
 # --- /bex factory managed ---
+
+# Lossless FLAC folder (contains reference code and credentials)
+Lossless FLAC/
