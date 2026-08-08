@@ -81,8 +81,26 @@ jobs:
             cargo install --git "https://github.com/siamislamtalha/Void-ext" --bin bex --locked
           fi
 
+      - name: Install wasm-opt
+        run: |
+          echo "Installing wasm-opt for WebAssembly optimization..."
+          sudo apt-get update
+          sudo apt-get install -y binaryen
+          echo "wasm-opt installed successfully"
+
       - name: Build and pack all plugins
         run: bex pack-all --dir . --output-dir plugins --skip-failures
+
+      - name: Build lossless-unified plugin
+        continue-on-error: true
+        run: |
+          echo "Building lossless-unified plugin..."
+          cd lossless-unified
+          cargo build --release --target wasm32-unknown-unknown
+          wasm-opt -O3 target/wasm32-unknown-unknown/release/lossless_unified.wasm -o target/wasm32-unknown-unknown/release/lossless_unified.opt.wasm -O3 --strip-proc || echo "wasm-opt optimization failed, continuing without it"
+          cargo component build --release
+          cp target/wasm32-unknown-unknown/release/lossless_unified.wasm ../plugins/lossless-unified.wasm
+          echo "lossless-unified plugin built successfully"
 
       - name: Count packed plugins
         id: packed
