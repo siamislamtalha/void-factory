@@ -23,7 +23,7 @@ md-5 = "0.10"
 sha2 = "0.10"
 aes = "0.8"
 blowfish = "0.9"
-rand = { version = "0.8", features = ["js"] }
+rand = "0.8"
 hmac = "0.12"
 regex = "1.10"
 bytes = "1.5"
