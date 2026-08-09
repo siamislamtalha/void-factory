@@ -244,7 +244,7 @@ impl TidalClient {
     }
 
     /// Get album details
-    pub async fn get_album(&self, album_id: &str) -> Result<UnifiedAlbum>, String> {
+    pub async fn get_album(&self, album_id: &str) -> Result<UnifiedAlbum, String> {
         let params = serde_json::json!({
             "countryCode": self.country_code,
         });

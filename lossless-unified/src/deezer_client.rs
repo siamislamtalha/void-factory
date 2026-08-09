@@ -319,15 +319,6 @@ impl DeezerClient {
         
         Ok(vec![])
     }
-            .map_err(|e| format!("JSON parse error: {}", e))?;
-
-        if let Some(albums) = data.get("albums").and_then(|a| a.get("data")).and_then(|d| d.as_array()) {
-            return albums.iter()
-                .filter_map(|item| self.parse_album(item))
-                .collect();
-        }
-        
-        Ok(vec![])
     }
 
     fn generate_session_id() -> String {
