@@ -32,7 +32,8 @@ pub fn decrypt_tidal_mqa(data: &[u8], encryption_key: &str) -> Result<Vec<u8>, S
     
     // Initialize decryptor with master key
     let key = GenericArray::from_slice(&master_key);
-    let iv_array = GenericArray::from_slice(iv);
+    type Aes256Block = GenericArray<u8, aes::cipher::consts::U16>;
+    let iv_array: &Aes256Block = GenericArray::from_slice(iv);
     let decryptor = Aes256::new(key);
     
     // Decrypt the security token
@@ -72,7 +73,8 @@ pub fn decrypt_deezer_blowfish(data: &[u8], track_id: &str) -> Result<Vec<u8>, S
     // Generate Blowfish key from track ID
     let blowfish_key = generate_deezer_blowfish_key(track_id);
     
-    let cipher = Blowfish::new_from_slice(&blowfish_key)
+    type BlowfishBE = Blowfish<blowfish::cipher::BigEndian>;
+    let cipher: BlowfishBE = Blowfish::new_from_slice(&blowfish_key)
         .map_err(|e| format!("Failed to create Blowfish cipher: {}", e))?;
     
     let chunk_size = 2048;
@@ -98,15 +100,13 @@ pub fn decrypt_deezer_blowfish(data: &[u8], track_id: &str) -> Result<Vec<u8>, S
 
 /// Generate Deezer Blowfish key from track ID
 fn generate_deezer_blowfish_key(track_id: &str) -> Vec<u8> {
+    let blowfish_secret = "g4el58wc0zvf9na1";
     let md5_hash = md5_hash(track_id);
     
     let mut key = Vec::new();
-    for (a, b, c) in zip(
-        md5_hash[..16].bytes(),
-        md5_hash[16..].bytes(),
-        blowfish_secret.bytes()
-    ) {
-        let xor_val = (a as u8) ^ (b as u8) ^ (c as u8);
+    for (i, (a, b)) in md5_hash.bytes().enumerate() {
+        let c = blowfish_secret.as_bytes()[i % blowfish_secret.len()];
+        let xor_val = (a as u8) ^ (b as u8) ^ c;
         key.push(xor_val);
     }
     

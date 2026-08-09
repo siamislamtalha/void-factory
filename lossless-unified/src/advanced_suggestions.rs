@@ -3,6 +3,7 @@ use crate::client::{ensure_clients_initialized, QOBUZ_CLIENT, TIDAL_CLIENT, DEEZ
 use bex_core::resolver::discovery::Section;
 use bex_core::resolver::types::MediaItem;
 use lazy_static::lazy_static;
+use std::collections::HashMap;
 use std::sync::Mutex;
 use std::time::{Duration, Instant};
 
@@ -419,197 +420,6 @@ async fn fetch_soundcloud_search_suggestions(client: &crate::soundcloud_client::
     }).collect())
 }
 
-/// Get cached home sections
-pub fn get_cached_home_sections() -> Vec<HomeSection> {
-    HOME_SECTIONS_CACHE.lock().unwrap().clone()
-}
-
-/// Get cached search suggestions
-pub fn get_cached_search_suggestions() -> Vec<SearchSuggestion> {
-    SEARCH_SUGGESTIONS_CACHE.lock().unwrap().clone()
-}
-
-// Qobuz home sections
-async fn fetch_qobuz_home_sections(client: &crate::qobuz_client::QobuzClient) -> Result<Vec<Section>, String> {
-    let mut sections = Vec::new();
-    
-    // Featured albums
-    if let Ok(featured) = client.get_featured_albums("best-sellers", 20).await {
-        let items: Vec<MediaItem> = featured.into_iter().map(MediaItem::Album).collect();
-        sections.push(Section {
-            id: "qobuz-best-sellers".to_string(),
-            title: "Qobuz Best Sellers".to_string(),
-            items,
-            page_token: None,
-        });
-    }
-    
-    // New releases
-    if let Ok(new_releases) = client.get_featured_albums("new-releases", 20).await {
-        let items: Vec<MediaItem> = new_releases.into_iter().map(MediaItem::Album).collect();
-        sections.push(Section {
-            id: "qobuz-new-releases".to_string(),
-            title: "Qobuz New Releases".to_string(),
-            items,
-            page_token: None,
-        });
-    }
-    
-    // Press awards
-    if let Ok(press_awards) = client.get_featured_albums("press-awards", 20).await {
-        let items: Vec<MediaItem> = press_awards.into_iter().map(MediaItem::Album).collect();
-        sections.push(Section {
-            id: "qobuz-press-awards".to_string(),
-            title: "Qobuz Press Awards".to_string(),
-            items,
-            page_token: None,
-        });
-    }
-    
-    Ok(sections)
-}
-
-// Tidal home sections
-async fn fetch_tidal_home_sections(client: &crate::tidal_client::TidalClient) -> Result<Vec<Section>, String> {
-    let mut sections = Vec::new();
-    
-    // Featured playlists
-    if let Ok(featured) = client.get_featured_playlists(20).await {
-        let items: Vec<MediaItem> = featured.into_iter().map(MediaItem::Playlist).collect();
-        sections.push(Section {
-            id: "tidal-featured-playlists".to_string(),
-            title: "Tidal Featured Playlists".to_string(),
-            items,
-            page_token: None,
-        });
-    }
-    
-    // Top tracks
-    if let Ok(top_tracks) = client.get_top_tracks(20).await {
-        let items: Vec<MediaItem> = top_tracks.into_iter().map(MediaItem::Track).collect();
-        sections.push(Section {
-            id: "tidal-top-tracks".to_string(),
-            title: "Tidal Top Tracks".to_string(),
-            items,
-            page_token: None,
-        });
-    }
-    
-    Ok(sections)
-}
-
-// Deezer home sections
-async fn fetch_deezer_home_sections(client: &crate::deezer_client::DeezerClient) -> Result<Vec<Section>, String> {
-    let mut sections = Vec::new();
-    
-    // Charts
-    if let Ok(charts) = client.get_charts(20).await {
-        let items: Vec<MediaItem> = charts.into_iter().map(MediaItem::Track).collect();
-        sections.push(Section {
-            id: "deezer-charts".to_string(),
-            title: "Deezer Charts".to_string(),
-            items,
-            page_token: None,
-        });
-    }
-    
-    // New releases
-    if let Ok(new_releases) = client.get_new_releases(20).await {
-        let items: Vec<MediaItem> = new_releases.into_iter().map(MediaItem::Album).collect();
-        sections.push(Section {
-            id: "deezer-new-releases".to_string(),
-            title: "Deezer New Releases".to_string(),
-            items,
-            page_token: None,
-        });
-    }
-    
-    Ok(sections)
-}
-
-// SoundCloud home sections
-async fn fetch_soundcloud_home_sections(client: &crate::soundcloud_client::SoundCloudClient) -> Result<Vec<Section>, String> {
-    let mut sections = Vec::new();
-    
-    // Trending tracks
-    if let Ok(trending) = client.get_trending_tracks(20).await {
-        let items: Vec<MediaItem> = trending.into_iter().map(MediaItem::Track).collect();
-        sections.push(Section {
-            id: "soundcloud-trending".to_string(),
-            title: "SoundCloud Trending".to_string(),
-            items,
-            page_token: None,
-        });
-    }
-    
-    Ok(sections)
-}
-
-// Search suggestions for each service
-async fn fetch_qobuz_search_suggestions(client: &crate::qobuz_client::QobuzClient, query: &str) -> Result<Vec<SearchSuggestion>, String> {
-    let mut suggestions = Vec::new();
-    
-    // Search for tracks
-    if let Ok(tracks) = client.search_tracks(query, 5).await {
-        for track in tracks {
-            suggestions.push(SearchSuggestion {
-                text: format!("{} - {}", track.artist.as_ref().map(|a| &a.name).unwrap_or("Unknown"), track.title),
-                suggestion_type: SuggestionType::Track,
-                metadata: Some(SuggestionMetadata {
-                    id: format!("qobuz:{}", track.id),
-                    artist: track.artist.as_ref().map(|a| a.name.clone()),
-                    cover: track.album.as_ref().and_then(|a| a.cover.clone()),
-                    source: MusicSource::Qobuz,
-                }),
-            });
-        }
-    }
-    
-    Ok(suggestions)
-}
-
-async fn fetch_tidal_search_suggestions(client: &crate::tidal_client::TidalClient, query: &str) -> Result<Vec<SearchSuggestion>, String> {
-    let mut suggestions = Vec::new();
-    
-    if let Ok(tracks) = client.search_tracks(query, 5).await {
-        for track in tracks {
-            suggestions.push(SearchSuggestion {
-                text: format!("{} - {}", track.artist.as_ref().map(|a| &a.name).unwrap_or("Unknown"), track.title),
-                suggestion_type: SuggestionType::Track,
-                metadata: Some(SuggestionMetadata {
-                    id: format!("tidal:{}", track.id),
-                    artist: track.artist.as_ref().map(|a| a.name.clone()),
-                    cover: track.album.as_ref().and_then(|a| a.cover.clone()),
-                    source: MusicSource::Tidal,
-                }),
-            });
-        }
-    }
-    
-    Ok(suggestions)
-}
-
-async fn fetch_deezer_search_suggestions(client: &crate::deezer_client::DeezerClient, query: &str) -> Result<Vec<SearchSuggestion>, String> {
-    let mut suggestions = Vec::new();
-    
-    if let Ok(tracks) = client.search_tracks(query, 5).await {
-        for track in tracks {
-            suggestions.push(SearchSuggestion {
-                text: format!("{} - {}", track.artist.as_ref().map(|a| &a.name).unwrap_or("Unknown"), track.title),
-                suggestion_type: SuggestionType::Track,
-                metadata: Some(SuggestionMetadata {
-                    id: format!("deezer:{}", track.id),
-                    artist: track.artist.as_ref().map(|a| a.name.clone()),
-                    cover: track.album.as_ref().and_then(|a| a.cover.clone()),
-                    source: MusicSource::Deezer,
-                }),
-            });
-        }
-    }
-    
-    Ok(suggestions)
-}
-
 /// Convert sections to home sections with type information
 fn convert_to_home_sections(sections: &[Section]) -> Vec<HomeSection> {
     sections.iter().map(|section| {
@@ -657,38 +467,93 @@ fn determine_source_from_id(section_id: &str) -> MusicSource {
 
 fn convert_media_item(item: &MediaItem) -> MediaItemData {
     match item {
-        MediaItem::Track(track) => MediaItemData {
-            id: track.id.clone(),
-            title: track.title.clone(),
-            artist: track.artists.first().map(|a| a.name.clone()),
-            cover: track.album.as_ref().and_then(|a| a.cover.clone()),
-            duration: track.duration,
-            item_type: MediaType::Track,
-        },
-        MediaItem::Album(album) => MediaItemData {
-            id: album.id.clone(),
-            title: album.title.clone(),
-            artist: album.artist.as_ref().map(|a| a.name.clone()),
-            cover: album.cover.clone(),
-            duration: album.duration,
-            item_type: MediaType::Album,
-        },
-        MediaItem::Artist(artist) => MediaItemData {
-            id: artist.id.clone(),
-            title: artist.name.clone(),
-            artist: Some(artist.name.clone()),
-            cover: artist.picture.clone(),
-            duration: None,
-            item_type: MediaType::Artist,
-        },
-        MediaItem::Playlist(playlist) => MediaItemData {
-            id: playlist.id.clone(),
-            title: playlist.title.clone(),
-            artist: playlist.creator.as_ref().map(|c| c.name.clone()),
-            cover: playlist.picture.clone(),
-            duration: playlist.duration,
-            item_type: MediaType::Playlist,
-        },
+        MediaItem::Track(track) => {
+            let unified_track = UnifiedTrack {
+                id: track.id.clone(),
+                title: track.title.clone(),
+                duration: (track.duration_ms / 1000) as u32,
+                track_number: None,
+                volume_number: None,
+                replay_gain: None,
+                peak: None,
+                available: true,
+                audio_quality: None,
+                audio_modes: None,
+                artist: track.artists.first().map(|a| UnifiedArtist {
+                    id: a.id.clone(),
+                    name: a.name.clone(),
+                    picture: a.picture.clone(),
+                    url: None,
+                    source: determine_source_from_id(&track.id),
+                }),
+                artists: Some(track.artists.iter().map(|a| UnifiedArtist {
+                    id: a.id.clone(),
+                    name: a.name.clone(),
+                    picture: a.picture.clone(),
+                    url: None,
+                    source: determine_source_from_id(&track.id),
+                }).collect()),
+                album: track.album.as_ref().map(|a| UnifiedAlbum {
+                    id: a.id.clone(),
+                    title: a.title.clone(),
+                    cover: a.cover.clone(),
+                    duration: None,
+                    track_count: None,
+                    release_date: None,
+                    artist: None,
+                    artists: None,
+                    url: None,
+                    source: determine_source_from_id(&track.id),
+                }),
+                source: determine_source_from_id(&track.id),
+                qualities_available: vec![Quality::LosslessFlac],
+            };
+            MediaItemData::Track(unified_track)
+        }
+        MediaItem::Album(_) => {
+            // Not supported in BEX types
+            MediaItemData::Track(UnifiedTrack {
+                id: "placeholder".to_string(),
+                title: "Unsupported".to_string(),
+                duration: 0,
+                track_number: None,
+                volume_number: None,
+                replay_gain: None,
+                peak: None,
+                available: true,
+                audio_quality: None,
+                audio_modes: None,
+                artist: None,
+                artists: None,
+                album: None,
+                source: MusicSource::Qobuz,
+                qualities_available: vec![],
+            })
+        }
+        MediaItem::Artist(_) => {
+            // Not supported in BEX types
+            MediaItemData::Artist(UnifiedArtist {
+                id: "placeholder".to_string(),
+                name: "Unsupported".to_string(),
+                picture: None,
+                url: None,
+                source: MusicSource::Qobuz,
+            })
+        }
+        MediaItem::Playlist(_) => {
+            // Not supported in BEX types
+            MediaItemData::Playlist(UnifiedPlaylist {
+                id: "placeholder".to_string(),
+                title: "Unsupported".to_string(),
+                description: None,
+                picture: None,
+                duration: None,
+                track_count: None,
+                last_updated: None,
+                creator: None,
+                source: MusicSource::Qobuz,
+            })
+        }
     }
 }
 

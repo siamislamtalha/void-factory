@@ -251,50 +251,6 @@ pub async fn search(query: &str, filter: SearchFilter, page: u32) -> Result<Page
     })
 }
 
-/// Get quality priority for sorting (higher = better quality)
-/// Priority order: Dolby Atmos > Ultra Hi-Res > Hi-Res > Lossless > High > Normal > Low
-fn get_item_quality_priority(item: &MediaItem) -> u8 {
-    match item {
-        MediaItem::Track(track) => {
-            // Check if track has quality info
-            if let Some(quality_str) = &track.audio_quality {
-                match quality_str.as_str() {
-                    "DOLBY_ATMOS" => 10, // Highest priority
-                    "ULTRA_HI_RES" | "ULTRAHIRES" => 9,
-                    "HI_RES" | "HIRES" => 8,
-                    "LOSSLESS" => 7,
-                    "HIGH" => 6,
-                    "NORMAL" => 5,
-                    "LOW" => 4,
-                    _ => 3,
-                }
-            } else {
-                // Check source-based quality priority
-                match track.source {
-                    MusicSource::Qobuz => 8, // Qobuz typically has highest quality
-                    MusicSource::Tidal => 7, // Tidal has MQA and Dolby Atmos
-                    MusicSource::Deezer => 6, // Deezer has FLAC
-                    MusicSource::SoundCloud => 3, // SoundCloud is lower quality
-                    MusicSource::Amazon => 7, // Amazon has UHD
-                    MusicSource::UnifiedPlayback => 8, // Depends on provider
-                }
-            }
-        }
-        MediaItem::Album(album) => {
-            // Similar priority for albums
-            match album.source {
-                MusicSource::Qobuz => 8,
-                MusicSource::Tidal => 7,
-                MusicSource::Deezer => 6,
-                MusicSource::SoundCloud => 3,
-                MusicSource::Amazon => 7,
-                MusicSource::UnifiedPlayback => 8,
-            }
-        }
-        _ => 0,
-    }
-}
-
 /// Advanced search with quality filtering
 pub async fn advanced_search(
     query: &str, 
@@ -382,8 +338,8 @@ fn get_item_quality_priority(item: &MediaItem) -> u8 {
                 return 8;
             }
             
-            // Then Lossless
-            if track.qualities_available.contains(&Quality::High) {
+            // Then Lossless FLAC
+            if track.qualities_available.contains(&Quality::LosslessFlac) {
                 return 7;
             }
             
@@ -641,23 +597,8 @@ pub async fn more_artist_albums(id: &str, page_token: &str) -> Result<PagedAlbum
 /// Get playlist details (not fully implemented for all services)
 pub async fn get_playlist_details(id: &str) -> Result<PlaylistDetails, String> {
     // Playlist support varies significantly between services
-    // For now, return a basic implementation
-    Ok(PlaylistDetails {
-        playlist: bex_core::resolver::types::Playlist {
-            id: id.to_string(),
-            title: "Playlist" .to_string(),
-            description: Some("Playlist support varies by service".to_string()),
-            cover_art: None,
-            author: None,
-            author_id: None,
-            track_count: 0,
-            duration: None,
-            last_updated: None,
-        },
-        tracks: None,
-        total_tracks: 0,
-        description: Some("Playlist support varies by service".to_string()),
-    })
+    // For now, return an error
+    Err("Playlist support not yet implemented".to_string())
 }
 
 /// Get more tracks from an album
@@ -853,12 +794,5 @@ fn convert_to_stream_source(info: StreamInfo) -> StreamSource {
         bitrate: info.bitrate as i32,
         format: info.codec,
         is_encrypted: info.encryption_key.is_some(),
-        drm_config: info.encryption_key.map(|key| {
-            bex_core::resolver::data_source::DrmConfig {
-                key_id: Some(info.track_id.clone()),
-                key: Some(key),
-                scheme: "custom".to_string(),
-            }
-        }),
     }
 }

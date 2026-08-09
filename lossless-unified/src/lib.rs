@@ -59,7 +59,6 @@ pub use monochrome_api::{
     search as monochrome_search,
     get_home_data,
     get_search_suggestions,
-    advanced_search,
 };
 
 // Re-export advanced suggestions and download manager
@@ -81,7 +80,6 @@ pub use download_manager::{
 
 // Re-export advanced client functions
 pub use client::{
-    advanced_search,
     find_best_quality_track,
 };
 
