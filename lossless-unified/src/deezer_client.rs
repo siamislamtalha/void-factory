@@ -151,7 +151,7 @@ impl DeezerClient {
     }
 
     /// Get album details
-    pub async fn get_album(&self, album_id: &str) -> Result<UnifiedAlbum>, String> {
+    pub async fn get_album(&self, album_id: &str) -> Result<UnifiedAlbum, String> {
         let url = format!("{}/album/{}", DEEZER_BASE_URL, album_id);
 
         let response = HTTP_CLIENT

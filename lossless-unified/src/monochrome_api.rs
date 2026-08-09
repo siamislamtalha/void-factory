@@ -389,14 +389,6 @@ pub async fn get_stream_url(id: &str, quality: &str) -> Result<MonochromeStreamI
     
     Err(format!("Failed to get stream URL at any quality. Last error: {}", last_error))
 }
-        quality: quality_level.as_str().to_string(),
-        codec: stream_info.codec,
-        bitrate: stream_info.bitrate,
-        sample_rate: stream_info.sample_rate,
-        bit_depth: stream_info.bit_depth,
-        encryption_key: stream_info.encryption_key,
-    })
-}
 
 /// Search in Monochrome format (enhanced with parallel search)
 /// Endpoint: /search?q={query}&type={type}
