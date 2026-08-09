@@ -319,7 +319,6 @@ impl DeezerClient {
         
         Ok(vec![])
     }
-    }
 
     fn generate_session_id() -> String {
         use rand::Rng;
