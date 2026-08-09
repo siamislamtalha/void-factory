@@ -266,12 +266,20 @@ impl DownloadManager {
         Ok("download_id_placeholder".to_string())
     }
 
-    /// Save data to file
+    /// Save data to file (no-op on wasm)
     async fn save_file(&self, filepath: &str, data: &[u8]) -> Result<(), String> {
-        tokio::fs::write(filepath, data)
-            .await
-            .map_err(|e| format!("Failed to save file: {}", e))?;
-        Ok(())
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            tokio::fs::write(filepath, data)
+                .await
+                .map_err(|e| format!("Failed to save file: {}", e))?;
+            Ok(())
+        }
+        #[cfg(target_arch = "wasm32")]
+        {
+            // File operations not supported in wasm/browser environment
+            Err("File operations not supported in wasm environment".to_string())
+        }
     }
 
     /// Generate filename for download
