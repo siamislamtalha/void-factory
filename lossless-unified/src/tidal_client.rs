@@ -430,9 +430,9 @@ impl TidalClient {
         // Determine available qualities based on audio quality
         let audio_quality = item.get("audioQuality").and_then(|q| q.as_str()).unwrap_or("LOSSLESS");
         let qualities_available = match audio_quality {
-            "HI_RES" => vec![Quality::High, Quality::HiRes],
-            "LOSSLESS" => vec![Quality::High],
-            _ => vec![Quality::Normal, Quality::High],
+            "HI_RES" => vec![Quality::LosslessFlac, Quality::HiRes],
+            "LOSSLESS" => vec![Quality::LosslessFlac],
+            _ => vec![Quality::Normal, Quality::LosslessFlac],
         };
 
         Some(UnifiedTrack {

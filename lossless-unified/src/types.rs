@@ -61,7 +61,7 @@ impl MusicSource {
 }
 
 /// Quality levels for streaming/download
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 pub enum Quality {
     Low = 0,        // 128 kbps MP3/AAC
     Normal = 1,     // 320 kbps MP3/AAC

@@ -355,7 +355,7 @@ impl DeezerClient {
         let album = item.get("album").and_then(|a| self.parse_album(a));
         
         // Determine available qualities
-        let qualities_available = vec![Quality::Normal, Quality::High];
+        let qualities_available = vec![Quality::Normal, Quality::LosslessFlac];
 
         Some(UnifiedTrack {
             id,

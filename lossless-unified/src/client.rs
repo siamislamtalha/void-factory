@@ -138,12 +138,32 @@ pub async fn search(query: &str, filter: SearchFilter, page: u32) -> Result<Page
         let client = QOBUZ_CLIENT.lock().unwrap();
         if let Some(client) = client.as_ref() {
             match filter {
-                SearchFilter::Tracks => client.search_tracks(query, limit).await,
-                SearchFilter::Albums => client.search_albums(query, limit).await.map(|a| {
-                    a.into_iter().map(MediaItem::Album).collect()
+                SearchFilter::Track => client.search_tracks(query, limit).await,
+                SearchFilter::Album => client.search_albums(query, limit).await.map(|a| {
+                    a.into_iter().map(|album| bex_core::resolver::types::MediaItem::Album(bex_core::resolver::types::AlbumSummary {
+                        id: format!("{}:{}", MusicSource::Qobuz.as_str(), album.id),
+                        title: album.title,
+                        artists: album.artist.iter().map(|a| bex_core::resolver::types::ArtistSummary {
+                            id: format!("{}:{}", MusicSource::Qobuz.as_str(), a.id),
+                            name: a.name.clone(),
+                            thumbnail: a.picture.clone().map(|p| bex_core::resolver::types::Artwork { url: p }),
+                            subtitle: None,
+                            url: a.url,
+                        }).collect(),
+                        thumbnail: album.cover.clone().map(|c| bex_core::resolver::types::Artwork { url: c }),
+                        subtitle: album.release_date.clone(),
+                        year: album.release_date.as_ref().and_then(|d| d.split('-').next()).and_then(|y| y.parse().ok()),
+                        url: album.url,
+                    })).collect()
                 }),
-                SearchFilter::Artists => client.search_artists(query, limit).await.map(|a| {
-                    a.into_iter().map(MediaItem::Artist).collect()
+                SearchFilter::Artist => client.search_artists(query, limit).await.map(|a| {
+                    a.into_iter().map(|artist| bex_core::resolver::types::MediaItem::Artist(bex_core::resolver::types::ArtistSummary {
+                        id: format!("{}:{}", MusicSource::Qobuz.as_str(), artist.id),
+                        name: artist.name,
+                        thumbnail: artist.picture.clone().map(|p| bex_core::resolver::types::Artwork { url: p }),
+                        subtitle: None,
+                        url: artist.url,
+                    })).collect()
                 }),
                 _ => Ok(vec![]),
             }
@@ -157,12 +177,32 @@ pub async fn search(query: &str, filter: SearchFilter, page: u32) -> Result<Page
         let client = TIDAL_CLIENT.lock().unwrap();
         if let Some(client) = client.as_ref() {
             match filter {
-                SearchFilter::Tracks => client.search_tracks(&query_clone, limit).await,
-                SearchFilter::Albums => client.search_albums(&query_clone, limit).await.map(|a| {
-                    a.into_iter().map(MediaItem::Album).collect()
+                SearchFilter::Track => client.search_tracks(&query_clone, limit).await,
+                SearchFilter::Album => client.search_albums(&query_clone, limit).await.map(|a| {
+                    a.into_iter().map(|album| bex_core::resolver::types::MediaItem::Album(bex_core::resolver::types::AlbumSummary {
+                        id: format!("{}:{}", MusicSource::Tidal.as_str(), album.id),
+                        title: album.title,
+                        artists: album.artist.iter().map(|a| bex_core::resolver::types::ArtistSummary {
+                            id: format!("{}:{}", MusicSource::Tidal.as_str(), a.id),
+                            name: a.name.clone(),
+                            thumbnail: a.picture.clone().map(|p| bex_core::resolver::types::Artwork { url: p }),
+                            subtitle: None,
+                            url: a.url,
+                        }).collect(),
+                        thumbnail: album.cover.clone().map(|c| bex_core::resolver::types::Artwork { url: c }),
+                        subtitle: album.release_date.clone(),
+                        year: album.release_date.as_ref().and_then(|d| d.split('-').next()).and_then(|y| y.parse().ok()),
+                        url: album.url,
+                    })).collect()
                 }),
-                SearchFilter::Artists => client.search_artists(&query_clone, limit).await.map(|a| {
-                    a.into_iter().map(MediaItem::Artist).collect()
+                SearchFilter::Artist => client.search_artists(&query_clone, limit).await.map(|a| {
+                    a.into_iter().map(|artist| bex_core::resolver::types::MediaItem::Artist(bex_core::resolver::types::ArtistSummary {
+                        id: format!("{}:{}", MusicSource::Tidal.as_str(), artist.id),
+                        name: artist.name,
+                        thumbnail: artist.picture.clone().map(|p| bex_core::resolver::types::Artwork { url: p }),
+                        subtitle: None,
+                        url: artist.url,
+                    })).collect()
                 }),
                 _ => Ok(vec![]),
             }
@@ -176,12 +216,32 @@ pub async fn search(query: &str, filter: SearchFilter, page: u32) -> Result<Page
         let client = DEEZER_CLIENT.lock().unwrap();
         if let Some(client) = client.as_ref() {
             match filter {
-                SearchFilter::Tracks => client.search_tracks(&query_clone, limit).await,
-                SearchFilter::Albums => client.search_albums(&query_clone, limit).await.map(|a| {
-                    a.into_iter().map(MediaItem::Album).collect()
+                SearchFilter::Track => client.search_tracks(&query_clone, limit).await,
+                SearchFilter::Album => client.search_albums(&query_clone, limit).await.map(|a| {
+                    a.into_iter().map(|album| bex_core::resolver::types::MediaItem::Album(bex_core::resolver::types::AlbumSummary {
+                        id: format!("{}:{}", MusicSource::Deezer.as_str(), album.id),
+                        title: album.title,
+                        artists: album.artist.iter().map(|a| bex_core::resolver::types::ArtistSummary {
+                            id: format!("{}:{}", MusicSource::Deezer.as_str(), a.id),
+                            name: a.name.clone(),
+                            thumbnail: a.picture.clone().map(|p| bex_core::resolver::types::Artwork { url: p }),
+                            subtitle: None,
+                            url: a.url,
+                        }).collect(),
+                        thumbnail: album.cover.clone().map(|c| bex_core::resolver::types::Artwork { url: c }),
+                        subtitle: album.release_date.clone(),
+                        year: album.release_date.as_ref().and_then(|d| d.split('-').next()).and_then(|y| y.parse().ok()),
+                        url: album.url,
+                    })).collect()
                 }),
-                SearchFilter::Artists => client.search_artists(&query_clone, limit).await.map(|a| {
-                    a.into_iter().map(MediaItem::Artist).collect()
+                SearchFilter::Artist => client.search_artists(&query_clone, limit).await.map(|a| {
+                    a.into_iter().map(|artist| bex_core::resolver::types::MediaItem::Artist(bex_core::resolver::types::ArtistSummary {
+                        id: format!("{}:{}", MusicSource::Tidal.as_str(), artist.id),
+                        name: artist.name,
+                        thumbnail: artist.picture.clone().map(|p| bex_core::resolver::types::Artwork { url: p }),
+                        subtitle: None,
+                        url: artist.url,
+                    })).collect()
                 }),
                 _ => Ok(vec![]),
             }
@@ -195,9 +255,15 @@ pub async fn search(query: &str, filter: SearchFilter, page: u32) -> Result<Page
         let client = SOUNDCLOUD_CLIENT.lock().unwrap();
         if let Some(client) = client.as_ref() {
             match filter {
-                SearchFilter::Tracks => client.search_tracks(&query_clone, limit).await,
-                SearchFilter::Playlists => client.search_playlists(&query_clone, limit).await.map(|p| {
-                    p.into_iter().map(MediaItem::Playlist).collect()
+                SearchFilter::Track => client.search_tracks(&query_clone, limit).await,
+                SearchFilter::Playlist => client.search_playlists(&query_clone, limit).await.map(|p| {
+                    p.into_iter().map(|playlist| bex_core::resolver::types::MediaItem::Playlist(bex_core::resolver::types::PlaylistSummary {
+                        id: format!("{}:{}", MusicSource::SoundCloud.as_str(), playlist.id),
+                        title: playlist.title,
+                        thumbnail: playlist.picture.clone().map(|p| bex_core::resolver::types::Artwork { url: p }),
+                        subtitle: playlist.description,
+                        url: playlist.url,
+                    })).collect()
                 }),
                 _ => Ok(vec![]),
             }
@@ -244,10 +310,6 @@ pub async fn search(query: &str, filter: SearchFilter, page: u32) -> Result<Page
     
     Ok(PagedMediaItems {
         items,
-        limit,
-        offset,
-        total,
-        next_page_token: if offset + limit < total { Some((page + 1).to_string()) } else { None },
     })
 }
 
@@ -266,21 +328,23 @@ pub async fn advanced_search(
         results.items = results.items.into_iter()
             .filter(|item| {
                 if let MediaItem::Track(track) = item {
-                    if let Some(quality_str) = &track.audio_quality {
-                        let quality = Quality::from_str(quality_str);
+                    // Check qualities_available instead of audio_quality
+                    for quality in &track.qualities_available {
                         if let Some(min_q) = min_quality {
-                            if quality < min_q {
+                            if quality < &min_q {
                                 return false;
                             }
                         }
                         if let Some(max_q) = max_quality {
-                            if quality > max_q {
+                            if quality > &max_q {
                                 return false;
                             }
                         }
                     }
+                    true
+                } else {
+                    true
                 }
-                true
             })
             .collect();
     }
@@ -294,7 +358,7 @@ pub async fn find_best_quality_track(query: &str, track_name: &str, artist_name:
     ensure_clients_initialized().await;
     
     let search_query = format!("{} {}", track_name, artist_name);
-    let results = search(&search_query, SearchFilter::Tracks, 1).await?;
+    let results = search(&search_query, SearchFilter::Track, 1).await?;
     
     // Find the best quality match with enhanced quality hierarchy
     results.items.into_iter()
@@ -302,7 +366,7 @@ pub async fn find_best_quality_track(query: &str, track_name: &str, artist_name:
             if let MediaItem::Track(track) = item {
                 // Check if title and artist match
                 let title_match = track.title.to_lowercase().contains(&track_name.to_lowercase());
-                let artist_match = track.artist.as_ref()
+                let artist_match = track.artists.first()
                     .map(|a| a.name.to_lowercase().contains(&artist_name.to_lowercase()))
                     .unwrap_or(false);
                 title_match && artist_match
@@ -427,7 +491,7 @@ pub async fn get_track_details(id: &str) -> Result<BexTrack, String> {
         MusicSource::Qobuz => {
             let client = QOBUZ_CLIENT.lock().unwrap();
             if let Some(client) = client.as_ref() {
-                client.get_track(actual_id).await?
+                client.get_track(&actual_id).await?
             } else {
                 return Err("Qobuz client not available".to_string());
             }
@@ -435,7 +499,7 @@ pub async fn get_track_details(id: &str) -> Result<BexTrack, String> {
         MusicSource::Tidal => {
             let client = TIDAL_CLIENT.lock().unwrap();
             if let Some(client) = client.as_ref() {
-                client.get_track(actual_id).await?
+                client.get_track(&actual_id).await?
             } else {
                 return Err("Tidal client not available".to_string());
             }
@@ -443,7 +507,7 @@ pub async fn get_track_details(id: &str) -> Result<BexTrack, String> {
         MusicSource::Deezer => {
             let client = DEEZER_CLIENT.lock().unwrap();
             if let Some(client) = client.as_ref() {
-                client.get_track(actual_id).await?
+                client.get_track(&actual_id).await?
             } else {
                 return Err("Deezer client not available".to_string());
             }

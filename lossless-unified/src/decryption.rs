@@ -4,22 +4,18 @@ use aes::cipher::{
     BlockEncrypt, BlockDecrypt, KeyInit,
     generic_array::GenericArray,
 };
-use blowfish::Blowfish;
-use blowfish::cipher::{
-    BlockEncrypt as BlowfishEncrypt, BlockDecrypt as BlowfishDecrypt,
-    BlockCipher as BlowfishCipher,
-};
-use md5::Md5;
-use std::iter::zip;
+use blowfish::{Blowfish, cipher::{BlockEncrypt as BlowfishEncrypt, BlockDecrypt as BlowfishDecrypt, BlockCipher as BlowfishCipher}};
+use md5::{Md5, Digest};
+use base64::{Engine as _, engine::general_purpose};
 
 /// Decrypt Tidal MQA encrypted streams
 pub fn decrypt_tidal_mqa(data: &[u8], encryption_key: &str) -> Result<Vec<u8>, String> {
     // Master key for Tidal MQA decryption (from streamrip)
     let master_key_b64 = "UIlTTEMmmLfGowo/UC60x2H45W6MdGgTRfo/umg4754=";
-    let master_key = base64::decode(master_key_b64)
+    let master_key = general_purpose::STANDARD.decode(master_key_b64)
         .map_err(|e| format!("Failed to decode master key: {}", e))?;
     
-    let security_token = base64::decode(encryption_key)
+    let security_token = general_purpose::STANDARD.decode(encryption_key)
         .map_err(|e| format!("Failed to decode security token: {}", e))?;
     
     if security_token.len() < 16 {
@@ -73,8 +69,7 @@ pub fn decrypt_deezer_blowfish(data: &[u8], track_id: &str) -> Result<Vec<u8>, S
     // Generate Blowfish key from track ID
     let blowfish_key = generate_deezer_blowfish_key(track_id);
     
-    type BlowfishBE = Blowfish<blowfish::cipher::BigEndian>;
-    let cipher: BlowfishBE = Blowfish::new_from_slice(&blowfish_key)
+    let cipher: Blowfish = Blowfish::new_from_slice(&blowfish_key)
         .map_err(|e| format!("Failed to create Blowfish cipher: {}", e))?;
     
     let chunk_size = 2048;
@@ -104,9 +99,9 @@ fn generate_deezer_blowfish_key(track_id: &str) -> Vec<u8> {
     let md5_hash = md5_hash(track_id);
     
     let mut key = Vec::new();
-    for (i, (a, b)) in md5_hash.bytes().enumerate() {
+    for (i, byte) in md5_hash.bytes().enumerate() {
         let c = blowfish_secret.as_bytes()[i % blowfish_secret.len()];
-        let xor_val = (a as u8) ^ (b as u8) ^ c;
+        let xor_val = byte ^ c;
         key.push(xor_val);
     }
     

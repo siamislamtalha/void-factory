@@ -1,6 +1,7 @@
 use crate::types::*;
 use crate::client::{ensure_clients_initialized, QOBUZ_CLIENT, TIDAL_CLIENT, DEEZER_CLIENT, SOUNDCLOUD_CLIENT};
 use crate::proxy::{get_unified_api_credentials, get_tidal_client_credentials};
+use bex_core::resolver::types::MediaItem;
 use reqwest::Client;
 use serde_json::Value;
 use lazy_static::lazy_static;
@@ -479,19 +480,19 @@ fn convert_to_monochrome_track(track: UnifiedTrack) -> MonochromeTrack {
     MonochromeTrack {
         id: track.id,
         title: track.title,
-        version: track.version,
-        duration: track.duration.unwrap_or(0),
-        track_number: track.track_number,
-        volume_number: None,
-        explicit: track.explicit,
-        audio_quality: track.audio_quality,
-        audio_modes: None,
-        stream_url: track.stream_url,
-        preview_url: track.preview_url,
-        copyright: track.copyright,
-        url: track.url,
-        artists: track.artists.into_iter().map(convert_to_monochrome_artist).collect(),
-        album: convert_to_monochrome_album(track.album),
+        version: None,
+        duration: Some(track.duration as i64),
+        track_number: track.track_number.map(|n| n as i32),
+        volume_number: track.volume_number.map(|n| n as i32),
+        explicit: Some(false),
+        audio_quality: track.audio_quality.map(|q| q.as_str().to_string()),
+        audio_modes: track.audio_modes,
+        stream_url: None,
+        preview_url: None,
+        copyright: None,
+        url: None,
+        artists: track.artists.unwrap_or_default().into_iter().map(convert_to_monochrome_artist).collect(),
+        album: track.album.map(|a| convert_to_monochrome_album(a)),
         extra: serde_json::Value::Object(serde_json::Map::new()),
     }
 }
@@ -512,14 +513,12 @@ fn convert_to_monochrome_album(album: UnifiedAlbum) -> MonochromeAlbum {
     MonochromeAlbum {
         id: album.id,
         title: album.title,
-        cover: album.cover,
-        cover_big: album.cover_big,
-        duration: album.duration,
-        track_count: album.track_count,
-        release_date: album.release_date,
-        copyright: album.copyright,
-        url: album.url,
-        artist: album.artist.map(convert_to_monochrome_artist),
+        cover_big: album.cover.clone(),
+        cover_small: album.cover,
+        duration: album.duration.map(|d| d as i64),
+        track_count: album.track_count.map(|n| n as i32),
+        copyright: None,
+        artists: album.artists.unwrap_or_default().into_iter().map(convert_to_monochrome_artist).collect(),
         extra: serde_json::Value::Object(serde_json::Map::new()),
     }
 }

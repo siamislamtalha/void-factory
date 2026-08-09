@@ -9,20 +9,33 @@ pub fn map_track(track: UnifiedTrack) -> BexTrack {
     BexTrack {
         id: format!("{}{}", track.source.id_prefix(), track.id),
         title: track.title,
-        artists: track.artists.unwrap_or_default().into_iter().map(|a| bex_core::resolver::types::Artist {
+        artists: track.artists.unwrap_or_default().into_iter().map(|a| bex_core::resolver::types::ArtistSummary {
             id: format!("{}:{}", track.source.as_str(), a.id),
             name: a.name,
-            picture: a.picture,
+            thumbnail: a.picture.map(|p| bex_core::resolver::types::Artwork { url: p }),
+            subtitle: None,
+            url: a.url,
         }).collect(),
         album: track.album.as_ref().map(|a| bex_core::resolver::types::AlbumSummary {
             id: format!("{}:{}", track.source.as_str(), a.id),
             title: a.title.clone(),
-            cover: a.cover.clone(),
+            artists: a.artist.iter().map(|ar| bex_core::resolver::types::ArtistSummary {
+                id: format!("{}:{}", track.source.as_str(), ar.id),
+                name: ar.name.clone(),
+                thumbnail: ar.picture.clone().map(|p| bex_core::resolver::types::Artwork { url: p }),
+                subtitle: None,
+                url: ar.url,
+            }).collect(),
+            thumbnail: a.cover.clone().map(|c| bex_core::resolver::types::Artwork { url: c }),
+            subtitle: a.release_date.clone(),
+            year: a.release_date.as_ref().and_then(|d| d.split('-').next()).and_then(|y| y.parse().ok()),
+            url: a.url,
         }),
-        duration_ms: track.duration as u64 * 1000,
-        thumbnail: track.album.as_ref().and_then(|a| a.cover.clone()),
+        duration_ms: Some(track.duration as u64 * 1000),
+        thumbnail: track.album.as_ref().and_then(|a| a.cover.clone()).map(|c| bex_core::resolver::types::Artwork { url: c }),
         url: None,
         lyrics: None,
+        is_explicit: false,
     }
 }
 
@@ -39,10 +52,11 @@ pub fn map_media_item(item: MediaItemData) -> bex_core::resolver::types::MediaIt
                 title: "Unsupported".to_string(),
                 artists: vec![],
                 album: None,
-                duration_ms: 0,
-                thumbnail: None,
+                duration_ms: Some(0),
+                thumbnail: bex_core::resolver::types::Artwork { url: String::new() },
                 url: None,
                 lyrics: None,
+                is_explicit: false,
             })
         }
         MediaItemData::Artist(_) => {
@@ -52,10 +66,11 @@ pub fn map_media_item(item: MediaItemData) -> bex_core::resolver::types::MediaIt
                 title: "Unsupported".to_string(),
                 artists: vec![],
                 album: None,
-                duration_ms: 0,
-                thumbnail: None,
+                duration_ms: Some(0),
+                thumbnail: bex_core::resolver::types::Artwork { url: String::new() },
                 url: None,
                 lyrics: None,
+                is_explicit: false,
             })
         }
         MediaItemData::Playlist(_) => {
@@ -65,10 +80,11 @@ pub fn map_media_item(item: MediaItemData) -> bex_core::resolver::types::MediaIt
                 title: "Unsupported".to_string(),
                 artists: vec![],
                 album: None,
-                duration_ms: 0,
-                thumbnail: None,
+                duration_ms: Some(0),
+                thumbnail: bex_core::resolver::types::Artwork { url: String::new() },
                 url: None,
                 lyrics: None,
+                is_explicit: false,
             })
         }
     }
@@ -94,7 +110,7 @@ pub fn media_item_to_unified(item: &BexMediaItem) -> Option<MediaItemData> {
             Some(MediaItemData::Track(UnifiedTrack {
                 id: actual_id,
                 title: track.title.clone(),
-                duration: (track.duration_ms / 1000) as u32,
+                duration: track.duration_ms.map(|d| (d / 1000) as u32).unwrap_or(0),
                 track_number: None,
                 volume_number: None,
                 replay_gain: None,
@@ -105,27 +121,27 @@ pub fn media_item_to_unified(item: &BexMediaItem) -> Option<MediaItemData> {
                 artist: track.artists.first().map(|a| UnifiedArtist {
                     id: a.id.clone(),
                     name: a.name.clone(),
-                    picture: a.picture.clone(),
-                    url: None,
+                    picture: a.thumbnail.as_ref().map(|t| t.url.clone()),
+                    url: a.url.clone(),
                     source,
                 }),
                 artists: Some(track.artists.iter().map(|a| UnifiedArtist {
                     id: a.id.clone(),
                     name: a.name.clone(),
-                    picture: a.picture.clone(),
-                    url: None,
+                    picture: a.thumbnail.as_ref().map(|t| t.url.clone()),
+                    url: a.url.clone(),
                     source,
                 }).collect()),
                 album: track.album.as_ref().map(|a| UnifiedAlbum {
                     id: a.id.clone(),
                     title: a.title.clone(),
-                    cover: a.cover.clone(),
+                    cover: a.thumbnail.as_ref().map(|t| t.url.clone()),
                     duration: None,
                     track_count: None,
-                    release_date: None,
+                    release_date: a.subtitle.clone(),
                     artist: None,
                     artists: None,
-                    url: None,
+                    url: a.url.clone(),
                     source,
                 }),
                 source,

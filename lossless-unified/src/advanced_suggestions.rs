@@ -225,18 +225,17 @@ pub fn get_cached_search_suggestions(query: &str) -> Option<Vec<SearchSuggestion
 
 /// Convert home sections to BEX format
 fn convert_to_bex_sections(sections: &[HomeSection]) -> Vec<Section> {
+    use crate::mapper::map_media_item;
     sections.iter().map(|section| {
         Section {
             id: section.id.clone(),
             title: section.title.clone(),
-            items: section.items.iter().map(|item| {
-                match item {
-                    MediaItemData::Track(track) => MediaItem::Track(track.clone()),
-                    MediaItemData::Album(album) => MediaItem::Album(album.clone()),
-                    MediaItemData::Artist(artist) => MediaItem::Artist(artist.clone()),
-                    MediaItemData::Playlist(playlist) => MediaItem::Playlist(playlist.clone()),
-                }
+            subtitle: section.section_type.as_str().to_string(),
+            card_type: "default".to_string(),
+            items: section.items.iter().filter_map(|item| {
+                Some(map_media_item(item.clone()))
             }).collect(),
+            more_link: None,
         }
     }).collect()
 }
@@ -428,7 +427,7 @@ fn convert_to_home_sections(sections: &[Section]) -> Vec<HomeSection> {
             id: section.id.clone(),
             title: section.title.clone(),
             items: section.items.iter().map(convert_media_item).collect(),
-            page_token: section.page_token.clone(),
+            page_token: section.more_link.clone(),
             source: determine_source_from_id(&section.id),
             section_type,
         }
@@ -471,7 +470,7 @@ fn convert_media_item(item: &MediaItem) -> MediaItemData {
             let unified_track = UnifiedTrack {
                 id: track.id.clone(),
                 title: track.title.clone(),
-                duration: (track.duration_ms / 1000) as u32,
+                duration: track.duration_ms.map(|d| (d / 1000) as u32).unwrap_or(0),
                 track_number: None,
                 volume_number: None,
                 replay_gain: None,
@@ -482,27 +481,27 @@ fn convert_media_item(item: &MediaItem) -> MediaItemData {
                 artist: track.artists.first().map(|a| UnifiedArtist {
                     id: a.id.clone(),
                     name: a.name.clone(),
-                    picture: a.picture.clone(),
-                    url: None,
+                    picture: a.thumbnail.as_ref().map(|t| t.url.clone()),
+                    url: a.url.clone(),
                     source: determine_source_from_id(&track.id),
                 }),
                 artists: Some(track.artists.iter().map(|a| UnifiedArtist {
                     id: a.id.clone(),
                     name: a.name.clone(),
-                    picture: a.picture.clone(),
-                    url: None,
+                    picture: a.thumbnail.as_ref().map(|t| t.url.clone()),
+                    url: a.url.clone(),
                     source: determine_source_from_id(&track.id),
                 }).collect()),
                 album: track.album.as_ref().map(|a| UnifiedAlbum {
                     id: a.id.clone(),
                     title: a.title.clone(),
-                    cover: a.cover.clone(),
+                    cover: a.thumbnail.as_ref().map(|t| t.url.clone()),
                     duration: None,
                     track_count: None,
-                    release_date: None,
+                    release_date: a.subtitle.clone(),
                     artist: None,
                     artists: None,
-                    url: None,
+                    url: a.url.clone(),
                     source: determine_source_from_id(&track.id),
                 }),
                 source: determine_source_from_id(&track.id),

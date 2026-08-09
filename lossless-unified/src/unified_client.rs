@@ -238,7 +238,7 @@ impl UnifiedClient {
             .and_then(|q| q.as_str())
             .map(|s| s.to_string());
 
-        let qualities_available = vec![Quality::High, Quality::HiRes, Quality::UltraHiRes];
+        let qualities_available = vec![Quality::LosslessFlac, Quality::HiRes, Quality::UltraHiRes];
 
         Some(UnifiedTrack {
             id,
@@ -288,7 +288,7 @@ impl UnifiedClient {
         match quality {
             Quality::Low => "LOW",
             Quality::Normal => "HIGH",
-            Quality::High => "LOSSLESS",
+            Quality::LosslessFlac => "LOSSLESS",
             Quality::HiRes => "HI_RES_LOSSLESS",
             Quality::UltraHiRes => "HI_RES_LOSSLESS",
             Quality::DolbyAtmos => "DOLBY_ATMOS",

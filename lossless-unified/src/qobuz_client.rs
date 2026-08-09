@@ -414,7 +414,7 @@ impl QobuzClient {
         let album = item.get("album").and_then(|a| self.parse_album(a));
         
         // Determine available qualities
-        let qualities_available = vec![Quality::High, Quality::HiRes, Quality::UltraHiRes];
+        let qualities_available = vec![Quality::LosslessFlac, Quality::HiRes, Quality::UltraHiRes];
 
         Some(UnifiedTrack {
             id,

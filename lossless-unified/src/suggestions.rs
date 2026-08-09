@@ -22,8 +22,10 @@ pub async fn fetch_home_sections() -> Result<Vec<Section>, String> {
                     sections.push(Section {
                         id: "qobuz_new_releases".to_string(),
                         title: "Qobuz: New Releases".to_string(),
-                        items: albums.into_iter().map(|a| MediaItem::Album(crate::mapper::map_album(a))).collect(),
-                        page_token: None,
+                        subtitle: "Albums".to_string(),
+                        card_type: "album".to_string(),
+                        items: albums.into_iter().map(|a| crate::mapper::map_media_item(crate::types::MediaItemData::Album(a))).collect(),
+                        more_link: None,
                     });
                 }
                 Err(e) => {
@@ -42,8 +44,10 @@ pub async fn fetch_home_sections() -> Result<Vec<Section>, String> {
                     sections.push(Section {
                         id: "tidal_featured".to_string(),
                         title: "Tidal: Featured Albums".to_string(),
-                        items: albums.into_iter().map(|a| MediaItem::Album(crate::mapper::map_album(a))).collect(),
-                        page_token: None,
+                        subtitle: "Albums".to_string(),
+                        card_type: "album".to_string(),
+                        items: albums.into_iter().map(|a| crate::mapper::map_media_item(crate::types::MediaItemData::Album(a))).collect(),
+                        more_link: None,
                     });
                 }
                 Err(e) => {
@@ -62,8 +66,10 @@ pub async fn fetch_home_sections() -> Result<Vec<Section>, String> {
                     sections.push(Section {
                         id: "deezer_charts".to_string(),
                         title: "Deezer: Charts".to_string(),
-                        items: albums.into_iter().map(|a| MediaItem::Album(crate::mapper::map_album(a))).collect(),
-                        page_token: None,
+                        subtitle: "Albums".to_string(),
+                        card_type: "album".to_string(),
+                        items: albums.into_iter().map(|a| crate::mapper::map_media_item(crate::types::MediaItemData::Album(a))).collect(),
+                        more_link: None,
                     });
                 }
                 Err(e) => {
@@ -82,8 +88,10 @@ pub async fn fetch_home_sections() -> Result<Vec<Section>, String> {
                     sections.push(Section {
                         id: "soundcloud_trending".to_string(),
                         title: "SoundCloud: Trending".to_string(),
+                        subtitle: "Tracks".to_string(),
+                        card_type: "track".to_string(),
                         items: tracks.into_iter().map(|t| MediaItem::Track(crate::mapper::map_track(t))).collect(),
-                        page_token: None,
+                        more_link: None,
                     });
                 }
                 Err(e) => {
@@ -123,7 +131,7 @@ pub async fn load_more_section(section_id: &str, page_token: &str) -> Result<Vec
             let client = QOBUZ_CLIENT.lock().unwrap();
             if let Some(client) = client.as_ref() {
                 client.get_featured("new-releases", limit).await
-                    .map(|albums| albums.into_iter().map(|a| MediaItem::Album(crate::mapper::map_album(a))).collect())
+                    .map(|albums| albums.into_iter().map(|a| crate::mapper::map_media_item(crate::types::MediaItemData::Album(a))).collect())
             } else {
                 Err("Qobuz client not available".to_string())
             }
@@ -132,7 +140,7 @@ pub async fn load_more_section(section_id: &str, page_token: &str) -> Result<Vec
             let client = TIDAL_CLIENT.lock().unwrap();
             if let Some(client) = client.as_ref() {
                 client.get_featured(limit).await
-                    .map(|albums| albums.into_iter().map(|a| MediaItem::Album(crate::mapper::map_album(a))).collect())
+                    .map(|albums| albums.into_iter().map(|a| crate::mapper::map_media_item(crate::types::MediaItemData::Album(a))).collect())
             } else {
                 Err("Tidal client not available".to_string())
             }
@@ -141,7 +149,7 @@ pub async fn load_more_section(section_id: &str, page_token: &str) -> Result<Vec
             let client = DEEZER_CLIENT.lock().unwrap();
             if let Some(client) = client.as_ref() {
                 client.get_featured(limit).await
-                    .map(|albums| albums.into_iter().map(|a| MediaItem::Album(crate::mapper::map_album(a))).collect())
+                    .map(|albums| albums.into_iter().map(|a| crate::mapper::map_media_item(crate::types::MediaItemData::Album(a))).collect())
             } else {
                 Err("Deezer client not available".to_string())
             }
