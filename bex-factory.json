@@ -1,13 +1,10 @@
 {
-  "generated_at": "2026-08-10T15:32:55Z",
-  "plugin_count": 14,
   "plugins": [
     {
       "asset_name": "applemusicimporter.bex",
       "created_at": "2026-03-13T06:51:45.5102591Z",
       "description": "Import Apple Music playlists and albums importer.",
       "id": "content-importer.bloomfactory.applemusicimporter",
-      "last_updated": "2026-08-10T15:32:55Z",
       "manifest_version": "1.0",
       "name": "apple-music-importer",
       "publisher": {
@@ -18,15 +15,15 @@
       "thumbnail_url": "https://music.apple.com/favicon.ico",
       "type": "content-importer",
       "version": "1",
-      "download_url": "https://github.com/siamislamtalha/void-factory/releases/download/voidfactory-v32/applemusicimporter.bex",
-      "released_at": "2026-08-10T15:32:55Z"
+      "last_updated": "2026-08-10T16:25:59Z",
+      "download_url": "https://github.com/siamislamtalha/void-factory/releases/download/voidfactory-v33/applemusicimporter.bex",
+      "released_at": "2026-08-10T16:25:59Z"
     },
     {
       "asset_name": "billboard.bex",
       "created_at": "2026-03-13T06:47:10.5788495Z",
       "description": "Billboard chart data provider for Void Music",
       "id": "chart-provider.bloomfactory.billboard",
-      "last_updated": "2026-08-10T15:32:55Z",
       "manifest_version": "1.0",
       "name": "billboard",
       "publisher": {
@@ -37,15 +34,15 @@
       "thumbnail_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/Billboard-charts-logo-2018-billboard-1548-1024x677.jpg/330px-Billboard-charts-logo-2018-billboard-1548-1024x677.jpg",
       "type": "chart-provider",
       "version": "1",
-      "download_url": "https://github.com/siamislamtalha/void-factory/releases/download/voidfactory-v32/billboard.bex",
-      "released_at": "2026-08-10T15:32:55Z"
+      "last_updated": "2026-08-10T16:25:59Z",
+      "download_url": "https://github.com/siamislamtalha/void-factory/releases/download/voidfactory-v33/billboard.bex",
+      "released_at": "2026-08-10T16:25:59Z"
     },
     {
       "asset_name": "itunessearchsuggestions.bex",
       "created_at": "2026-03-13T06:48:23.2176719Z",
       "description": "Fast search suggestions powered by iTunes Search API and Apple Music RSS.",
       "id": "search-suggestion-provider.bloomfactory.itunessearchsuggestions",
-      "last_updated": "2026-08-10T15:32:55Z",
       "manifest_version": "1.0",
       "name": "itunes-search-suggestions",
       "publisher": {
@@ -56,15 +53,15 @@
       "thumbnail_url": "https://music.apple.com/favicon.ico",
       "type": "search-suggestion-provider",
       "version": "1",
-      "download_url": "https://github.com/siamislamtalha/void-factory/releases/download/voidfactory-v32/itunessearchsuggestions.bex",
-      "released_at": "2026-08-10T15:32:55Z"
+      "last_updated": "2026-08-10T16:25:59Z",
+      "download_url": "https://github.com/siamislamtalha/void-factory/releases/download/voidfactory-v33/itunessearchsuggestions.bex",
+      "released_at": "2026-08-10T16:25:59Z"
     },
     {
       "asset_name": "jisaavn.bex",
       "created_at": "2026-03-13T06:46:28.3072614Z",
       "description": "Jiosaavn based content provider.",
       "id": "content-resolver.bloomfactory.jisaavn",
-      "last_updated": "2026-08-10T15:32:55Z",
       "manifest_version": "1.0",
       "name": "jisaavn",
       "publisher": {
@@ -75,15 +72,15 @@
       "thumbnail_url": "https://www.jiosaavn.com/favicon.ico",
       "type": "content-resolver",
       "version": "2",
-      "download_url": "https://github.com/siamislamtalha/void-factory/releases/download/voidfactory-v32/jisaavn.bex",
-      "released_at": "2026-08-10T15:32:55Z"
+      "last_updated": "2026-08-10T16:25:59Z",
+      "download_url": "https://github.com/siamislamtalha/void-factory/releases/download/voidfactory-v33/jisaavn.bex",
+      "released_at": "2026-08-10T16:25:59Z"
     },
     {
       "asset_name": "jiosaavnimporter.bex",
       "created_at": "2026-03-13T06:51:07.1019608Z",
       "description": "Import Jiosaavn playlists and albums into Void Music.",
       "id": "content-importer.bloomfactory.jiosaavnimporter",
-      "last_updated": "2026-08-10T15:32:55Z",
       "manifest_version": "1.0",
       "name": "jiosaavn-importer",
       "publisher": {
@@ -94,15 +91,15 @@
       "thumbnail_url": "https://www.jiosaavn.com/favicon.ico",
       "type": "content-importer",
       "version": "1",
-      "download_url": "https://github.com/siamislamtalha/void-factory/releases/download/voidfactory-v32/jiosaavnimporter.bex",
-      "released_at": "2026-08-10T15:32:55Z"
+      "last_updated": "2026-08-10T16:25:59Z",
+      "download_url": "https://github.com/siamislamtalha/void-factory/releases/download/voidfactory-v33/jiosaavnimporter.bex",
+      "released_at": "2026-08-10T16:25:59Z"
     },
     {
       "asset_name": "lrcnet.bex",
       "created_at": "2026-03-13T06:46:44.8992734Z",
       "description": "Multi-source lyrics provider fetching from LRCLIB, KuGou, and BetterLyrics APIs with automatic fallback for maximum coverage.",
       "id": "lyrics-provider.bloomfactory.lrcnet",
-      "last_updated": "2026-08-10T15:32:55Z",
       "manifest_version": "1.0",
       "name": "lrcnet",
       "publisher": {
@@ -113,15 +110,15 @@
       "thumbnail_url": "https://lrclib.net/assets/lrclib-370c57eb.png",
       "type": "lyrics-provider",
       "version": "2",
-      "download_url": "https://github.com/siamislamtalha/void-factory/releases/download/voidfactory-v32/lrcnet.bex",
-      "released_at": "2026-08-10T15:32:55Z"
+      "last_updated": "2026-08-10T16:25:59Z",
+      "download_url": "https://github.com/siamislamtalha/void-factory/releases/download/voidfactory-v33/lrcnet.bex",
+      "released_at": "2026-08-10T16:25:59Z"
     },
     {
       "asset_name": "multisource.bex",
       "created_at": "2026-07-24T17:00:00.0000000Z",
       "description": "Multi-source music aggregator searching across YouTube Music, YouTube Video, JioSaavn, Spotify, Apple Music, Deezer, and more with unified results.",
       "id": "content-resolver.bloomfactory.multisource",
-      "last_updated": "2026-08-10T15:32:55Z",
       "manifest_version": "1.0",
       "name": "multi-source",
       "publisher": {
@@ -132,15 +129,15 @@
       "thumbnail_url": "https://github.com/siamislamtalha/Void-Music/blob/main/multi-source.png",
       "type": "content-resolver",
       "version": "1",
-      "download_url": "https://github.com/siamislamtalha/void-factory/releases/download/voidfactory-v32/multisource.bex",
-      "released_at": "2026-08-10T15:32:55Z"
+      "last_updated": "2026-08-10T16:25:59Z",
+      "download_url": "https://github.com/siamislamtalha/void-factory/releases/download/voidfactory-v33/multisource.bex",
+      "released_at": "2026-08-10T16:25:59Z"
     },
     {
       "asset_name": "musicbrainzsuggestions.bex",
       "created_at": "2026-03-13T06:48:58.4158864Z",
       "description": "Search suggestions powered by MusicBrainz API.",
       "id": "search-suggestion-provider.bloomfactory.musicbrainzsuggestions",
-      "last_updated": "2026-08-10T15:32:55Z",
       "manifest_version": "1.0",
       "name": "musicbrainz-suggestions",
       "publisher": {
@@ -151,15 +148,15 @@
       "thumbnail_url": "https://avatars.githubusercontent.com/u/293421?s=200&v=4",
       "type": "search-suggestion-provider",
       "version": "1",
-      "download_url": "https://github.com/siamislamtalha/void-factory/releases/download/voidfactory-v32/musicbrainzsuggestions.bex",
-      "released_at": "2026-08-10T15:32:55Z"
+      "last_updated": "2026-08-10T16:25:59Z",
+      "download_url": "https://github.com/siamislamtalha/void-factory/releases/download/voidfactory-v33/musicbrainzsuggestions.bex",
+      "released_at": "2026-08-10T16:25:59Z"
     },
     {
       "asset_name": "spotifyimporter.bex",
       "created_at": "2026-03-13T06:52:27.660671Z",
       "description": "Import Spotify playlists and albums into Void Music with robust Spotify web token extraction, API-first fetching, and embed fallback",
       "id": "content-importer.bloomfactory.spotifyimporter",
-      "last_updated": "2026-08-10T15:32:55Z",
       "manifest_version": "1.0",
       "name": "spotify-importer",
       "publisher": {
@@ -170,15 +167,15 @@
       "thumbnail_url": "https://www.scdn.co/i/_global/favicon.png",
       "type": "content-importer",
       "version": "3",
-      "download_url": "https://github.com/siamislamtalha/void-factory/releases/download/voidfactory-v32/spotifyimporter.bex",
-      "released_at": "2026-08-10T15:32:55Z"
+      "last_updated": "2026-08-10T16:25:59Z",
+      "download_url": "https://github.com/siamislamtalha/void-factory/releases/download/voidfactory-v33/spotifyimporter.bex",
+      "released_at": "2026-08-10T16:25:59Z"
     },
     {
       "asset_name": "universal-downloader.bex",
       "created_at": "2026-07-25T15:00:00.0000000Z",
       "description": "Universal music downloader with multi-method fallback support. Implements YouTube Innertube API with 8 backup keys, JioSaavn DES-ECB decryption, and direct HTTP streaming with automatic failover for maximum reliability.",
       "id": "content-resolver.bloomfactory.universal-downloader",
-      "last_updated": "2026-08-10T15:32:55Z",
       "manifest_version": "1.0",
       "name": "universal-downloader",
       "publisher": {
@@ -189,15 +186,15 @@
       "thumbnail_url": "https://github.com/siamislamtalha/Void-Music/blob/main/universal-downloader.png",
       "type": "content-resolver",
       "version": "1",
-      "download_url": "https://github.com/siamislamtalha/void-factory/releases/download/voidfactory-v32/universal-downloader.bex",
-      "released_at": "2026-08-10T15:32:55Z"
+      "last_updated": "2026-08-10T16:25:59Z",
+      "download_url": "https://github.com/siamislamtalha/void-factory/releases/download/voidfactory-v33/universal-downloader.bex",
+      "released_at": "2026-08-10T16:25:59Z"
     },
     {
       "asset_name": "ytmusic.bex",
       "created_at": "2026-03-13T06:41:40.758641Z",
       "description": "Music streaming integration powered by YouTube Music.",
       "id": "content-resolver.bloomfactory.ytmusic",
-      "last_updated": "2026-08-10T15:32:55Z",
       "manifest_version": "1.0",
       "name": "ytmusic",
       "publisher": {
@@ -208,15 +205,15 @@
       "thumbnail_url": "https://icon-icons.com/download-file?file=https%3A%2F%2Fimages.icon-icons.com%2F2657%2FPNG%2F256%2Fyoutube_music_icon_161084.png&id=161084&pack_or_individual=pack",
       "type": "content-resolver",
       "version": "3",
-      "download_url": "https://github.com/siamislamtalha/void-factory/releases/download/voidfactory-v32/ytmusic.bex",
-      "released_at": "2026-08-10T15:32:55Z"
+      "last_updated": "2026-08-10T16:25:59Z",
+      "download_url": "https://github.com/siamislamtalha/void-factory/releases/download/voidfactory-v33/ytmusic.bex",
+      "released_at": "2026-08-10T16:25:59Z"
     },
     {
       "asset_name": "ytmusicimporter.bex",
       "created_at": "2026-03-13T06:51:25.1754671Z",
       "description": "Import YouTube Music playlists and albums into Void Music.",
       "id": "content-importer.bloomfactory.ytmusicimporter",
-      "last_updated": "2026-08-10T15:32:55Z",
       "manifest_version": "1.0",
       "name": "ytmusic-importer",
       "publisher": {
@@ -227,15 +224,15 @@
       "thumbnail_url": "https://icon-icons.com/download-file?file=https%3A%2F%2Fimages.icon-icons.com%2F2657%2FPNG%2F256%2Fyoutube_music_icon_161084.png&id=161084&pack_or_individual=pack",
       "type": "content-importer",
       "version": "1",
-      "download_url": "https://github.com/siamislamtalha/void-factory/releases/download/voidfactory-v32/ytmusicimporter.bex",
-      "released_at": "2026-08-10T15:32:55Z"
+      "last_updated": "2026-08-10T16:25:59Z",
+      "download_url": "https://github.com/siamislamtalha/void-factory/releases/download/voidfactory-v33/ytmusicimporter.bex",
+      "released_at": "2026-08-10T16:25:59Z"
     },
     {
       "asset_name": "ytmusicsearchsuggestion.bex",
       "created_at": "2026-03-13T06:47:48.5375999Z",
       "description": "Search suggestions powered by YouTube Music API.",
       "id": "search-suggestion-provider.bloomfactory.ytmusicsearchsuggestion",
-      "last_updated": "2026-08-10T15:32:55Z",
       "manifest_version": "1.0",
       "name": "ytmusic-search-suggestion",
       "publisher": {
@@ -246,15 +243,15 @@
       "thumbnail_url": "https://icon-icons.com/download-file?file=https%3A%2F%2Fimages.icon-icons.com%2F2657%2FPNG%2F256%2Fyoutube_music_icon_161084.png&id=161084&pack_or_individual=pack",
       "type": "search-suggestion-provider",
       "version": "1",
-      "download_url": "https://github.com/siamislamtalha/void-factory/releases/download/voidfactory-v32/ytmusicsearchsuggestion.bex",
-      "released_at": "2026-08-10T15:32:55Z"
+      "last_updated": "2026-08-10T16:25:59Z",
+      "download_url": "https://github.com/siamislamtalha/void-factory/releases/download/voidfactory-v33/ytmusicsearchsuggestion.bex",
+      "released_at": "2026-08-10T16:25:59Z"
     },
     {
       "asset_name": "ytvideo.bex",
       "created_at": "2026-03-13T06:46:13.5018763Z",
       "description": "Resolve YouTube video content.",
       "id": "content-resolver.bloomfactory.ytvideo",
-      "last_updated": "2026-08-10T15:32:55Z",
       "manifest_version": "1.0",
       "name": "ytvideo",
       "publisher": {
@@ -265,17 +262,229 @@
       "thumbnail_url": "https://www.gstatic.com/youtube/img/branding/favicon/favicon_144x144.png",
       "type": "content-resolver",
       "version": "2",
-      "download_url": "https://github.com/siamislamtalha/void-factory/releases/download/voidfactory-v32/ytvideo.bex",
-      "released_at": "2026-08-10T15:32:55Z"
+      "last_updated": "2026-08-10T16:25:59Z",
+      "download_url": "https://github.com/siamislamtalha/void-factory/releases/download/voidfactory-v33/ytvideo.bex",
+      "released_at": "2026-08-10T16:25:59Z"
     }
   ],
-  "schema_version": "1.0",
+  "categories": {
+    "Audiophile": {
+      "plugins": [
+        {
+          "asset_name": "amzn.sflx",
+          "created_at": "2026-07-10T00:00:00Z",
+          "description": "Amazon Music metadata & download provider for VOID Music. Browse tracks, albums, artists, playlists from Amazon Music links and search. Downloads lossless and Dolby Atmos audio.",
+          "id": "audiophile.voidfactory.amazon",
+          "manifest_version": "1.0",
+          "name": "amazon",
+          "publisher": {
+            "contact": null,
+            "name": "zarzet",
+            "url": "https://github.com/zarzet"
+          },
+          "thumbnail_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Amazon_logo.svg/320px-Amazon_logo.svg.png",
+          "type": "download",
+          "version": "2.2.1",
+          "last_updated": "2026-08-10T16:25:59Z",
+          "download_url": "https://github.com/siamislamtalha/void-factory/releases/download/voidfactory-v33/amzn.sflx",
+          "released_at": "2026-08-10T16:25:59Z"
+        },
+        {
+          "asset_name": "apple-music.sflx",
+          "created_at": "2026-07-31T00:00:00Z",
+          "description": "Apple Music metadata and lyrics provider for VOID Music. Fetches ISRC, label, copyright, genre, composer. Lyrics require a Media User Token (Apple Music subscription).",
+          "id": "audiophile.voidfactory.apple-music",
+          "manifest_version": "1.0",
+          "name": "apple-music",
+          "publisher": {
+            "contact": null,
+            "name": "zarzet",
+            "url": "https://github.com/zarzet"
+          },
+          "thumbnail_url": "https://music.apple.com/favicon.ico",
+          "type": "integration",
+          "version": "1.3.8",
+          "last_updated": "2026-08-10T16:25:59Z",
+          "download_url": "https://github.com/siamislamtalha/void-factory/releases/download/voidfactory-v33/apple-music.sflx",
+          "released_at": "2026-08-10T16:25:59Z"
+        },
+        {
+          "asset_name": "deezer.sflx",
+          "created_at": "2026-07-01T00:00:00Z",
+          "description": "Deezer metadata and download provider for VOID Music.",
+          "id": "audiophile.voidfactory.deezer",
+          "manifest_version": "1.0",
+          "name": "deezer",
+          "publisher": {
+            "contact": null,
+            "name": "zarzet",
+            "url": "https://github.com/zarzet"
+          },
+          "thumbnail_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d6/Deezer_logo.svg/320px-Deezer_logo.svg.png",
+          "type": "download",
+          "version": "1.2.0",
+          "last_updated": "2026-08-10T16:25:59Z",
+          "download_url": "https://github.com/siamislamtalha/void-factory/releases/download/voidfactory-v33/deezer.sflx",
+          "released_at": "2026-08-10T16:25:59Z"
+        },
+        {
+          "asset_name": "pandora.spotiflac-ext",
+          "created_at": "2026-05-03T10:17:57Z",
+          "description": "Pandora metadata and download provider for VOID Music. Handles Pandora track and album URLs.",
+          "id": "audiophile.voidfactory.pandora",
+          "manifest_version": "1.0",
+          "name": "pandora",
+          "publisher": {
+            "contact": null,
+            "name": "zarzet",
+            "url": "https://github.com/zarzet"
+          },
+          "thumbnail_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Pandora_Logo.svg/320px-Pandora_Logo.svg.png",
+          "type": "download",
+          "version": "1.0.8",
+          "last_updated": "2026-08-10T16:25:59Z",
+          "download_url": "https://github.com/siamislamtalha/void-factory/releases/download/voidfactory-v33/pandora.spotiflac-ext",
+          "released_at": "2026-08-10T16:25:59Z"
+        },
+        {
+          "asset_name": "qobuz-web.sflx",
+          "created_at": "2026-07-01T00:00:00Z",
+          "description": "Qobuz metadata and download provider for VOID Music.",
+          "id": "audiophile.voidfactory.qobuz",
+          "manifest_version": "1.0",
+          "name": "qobuz",
+          "publisher": {
+            "contact": null,
+            "name": "zarzet",
+            "url": "https://github.com/zarzet"
+          },
+          "thumbnail_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Qobuz_logo.svg/320px-Qobuz_logo.svg.png",
+          "type": "download",
+          "version": "1.1.0",
+          "last_updated": "2026-08-10T16:25:59Z",
+          "download_url": "https://github.com/siamislamtalha/void-factory/releases/download/voidfactory-v33/qobuz-web.sflx",
+          "released_at": "2026-08-10T16:25:59Z"
+        },
+        {
+          "asset_name": "soundcloud.spotiflac-ext",
+          "created_at": "2026-06-02T00:00:00Z",
+          "description": "SoundCloud metadata and download provider. Search tracks, albums, playlists, artists. Downloads via direct SoundCloud streams.",
+          "id": "audiophile.voidfactory.soundcloud",
+          "manifest_version": "1.0",
+          "name": "soundcloud",
+          "publisher": {
+            "contact": null,
+            "name": "zarzet",
+            "url": "https://github.com/zarzet"
+          },
+          "thumbnail_url": "https://soundcloud.com/favicon.ico",
+          "type": "download",
+          "version": "1.0.5",
+          "last_updated": "2026-08-10T16:25:59Z",
+          "download_url": "https://github.com/siamislamtalha/void-factory/releases/download/voidfactory-v33/soundcloud.spotiflac-ext",
+          "released_at": "2026-08-10T16:25:59Z"
+        },
+        {
+          "asset_name": "spotify-web.sflx",
+          "created_at": "2026-07-24T00:00:00Z",
+          "description": "Fetch Spotify metadata via web API for VOID Music. Supports personalized playlists like Daily Mix, Discover Weekly, and more. Includes Home Feed explore and metadata enrichment via Spotify native ISRC plus Deezer.",
+          "id": "audiophile.voidfactory.spotify-web",
+          "manifest_version": "1.0",
+          "name": "spotify-web",
+          "publisher": {
+            "contact": null,
+            "name": "zarzet",
+            "url": "https://github.com/zarzet"
+          },
+          "thumbnail_url": "https://www.scdn.co/i/_global/favicon.png",
+          "type": "integration",
+          "version": "1.9.14",
+          "last_updated": "2026-08-10T16:25:59Z",
+          "download_url": "https://github.com/siamislamtalha/void-factory/releases/download/voidfactory-v33/spotify-web.sflx",
+          "released_at": "2026-08-10T16:25:59Z"
+        },
+        {
+          "asset_name": "spotify-web.spotiflac-ext",
+          "created_at": "2026-07-24T00:00:00Z",
+          "description": "Spotify Web metadata and download provider for VOID Music.",
+          "id": "audiophile.voidfactory.spotify-web-ext",
+          "manifest_version": "1.0",
+          "name": "spotify-web-ext",
+          "publisher": {
+            "contact": null,
+            "name": "zarzet",
+            "url": "https://github.com/zarzet"
+          },
+          "thumbnail_url": "https://www.scdn.co/i/_global/favicon.png",
+          "type": "download",
+          "version": "1.0.0",
+          "last_updated": "2026-08-10T16:25:59Z",
+          "download_url": "https://github.com/siamislamtalha/void-factory/releases/download/voidfactory-v33/spotify-web.spotiflac-ext",
+          "released_at": "2026-08-10T16:25:59Z"
+        },
+        {
+          "asset_name": "tidal-web.sflx",
+          "created_at": "2026-07-01T00:00:00Z",
+          "description": "TIDAL metadata and search provider for VOID Music using TIDAL public web endpoints.",
+          "id": "audiophile.voidfactory.tidal",
+          "manifest_version": "1.0",
+          "name": "tidal",
+          "publisher": {
+            "contact": null,
+            "name": "zarzet",
+            "url": "https://github.com/zarzet"
+          },
+          "thumbnail_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Tidal_logo.svg/320px-Tidal_logo.svg.png",
+          "type": "download",
+          "version": "1.1.2",
+          "last_updated": "2026-08-10T16:25:59Z",
+          "download_url": "https://github.com/siamislamtalha/void-factory/releases/download/voidfactory-v33/tidal-web.sflx",
+          "released_at": "2026-08-10T16:25:59Z"
+        },
+        {
+          "asset_name": "ytmusic-spotiflac.sflx",
+          "created_at": "2026-07-10T00:00:00Z",
+          "description": "YouTube Music metadata & download provider for VOID Music. Search tracks, albums, playlists on YouTube Music.",
+          "id": "audiophile.voidfactory.ytmusic",
+          "manifest_version": "1.0",
+          "name": "ytmusic",
+          "publisher": {
+            "contact": null,
+            "name": "zarzet",
+            "url": "https://github.com/zarzet"
+          },
+          "thumbnail_url": "https://icon-icons.com/download-file?file=https%3A%2F%2Fimages.icon-icons.com%2F2657%2FPNG%2F256%2Fyoutube_music_icon_161084.png&id=161084&pack_or_individual=pack",
+          "type": "download",
+          "version": "2.3.9",
+          "last_updated": "2026-08-10T16:25:59Z",
+          "download_url": "https://github.com/siamislamtalha/void-factory/releases/download/voidfactory-v33/ytmusic-spotiflac.sflx",
+          "released_at": "2026-08-10T16:25:59Z"
+        },
+        {
+          "asset_name": "ytmusic-spotiflac.spotiflac-ext",
+          "created_at": "2026-07-10T00:00:00Z",
+          "description": "YouTube Music metadata & download provider for VOID Music. Search tracks, albums, playlists on YouTube Music.",
+          "id": "audiophile.voidfactory.ytmusic-ext",
+          "manifest_version": "1.0",
+          "name": "ytmusic-ext",
+          "publisher": {
+            "contact": null,
+            "name": "zarzet",
+            "url": "https://github.com/zarzet"
+          },
+          "thumbnail_url": "https://icon-icons.com/download-file?file=https%3A%2F%2Fimages.icon-icons.com%2F2657%2FPNG%2F256%2Fyoutube_music_icon_161084.png&id=161084&pack_or_individual=pack",
+          "type": "download",
+          "version": "2.3.9",
+          "last_updated": "2026-08-10T16:25:59Z",
+          "download_url": "https://github.com/siamislamtalha/void-factory/releases/download/voidfactory-v33/ytmusic-spotiflac.spotiflac-ext",
+          "released_at": "2026-08-10T16:25:59Z"
+        }
+      ]
+    }
+  },
   "name": "VoidFactory (Unofficial + Community)",
   "description": "Plugin repository for Void Music by community.",
   "thumbnail_url": null,
-  "categories": {
-    "Audiophile": {
-      "plugins": []
-    }
-  }
+  "generated_at": "2026-08-10T16:25:59Z",
+  "plugin_count": 25
 }
