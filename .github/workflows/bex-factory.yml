@@ -140,6 +140,7 @@ jobs:
             | .description = (if $desc == "" then null else $desc end)
             | .thumbnail_url = (if $thumb == "" then null else $thumb end)
             | .generated_at = $stamp
+            | .plugin_count = ((.plugins | length) + (.categories.Audiophile.plugins | length))
             | .plugins |= (if . == null then [] else map(. + {
                 last_updated: $stamp,
                 download_url: ($base + "/" + .asset_name),
@@ -150,7 +151,7 @@ jobs:
                 download_url: ($base + "/" + .asset_name),
                 released_at: $stamp
               }) end)
-          ' plugins/bex-factory.json > bex-factory.json
+          ' .github/bex-factory-template.json > bex-factory.json
 
       - name: Publish GitHub release
         env:
