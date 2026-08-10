@@ -237,8 +237,8 @@
           "name": "amazon",
           "publisher": {
             "contact": null,
-            "name": "zarzet",
-            "url": "https://github.com/zarzet"
+            "name": "siamislamtalha",
+            "url": "https://github.com/siamislamtalha"
           },
           "thumbnail_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Amazon_logo.svg/320px-Amazon_logo.svg.png",
           "type": "download",
@@ -253,8 +253,8 @@
           "name": "apple-music",
           "publisher": {
             "contact": null,
-            "name": "zarzet",
-            "url": "https://github.com/zarzet"
+            "name": "siamislamtalha",
+            "url": "https://github.com/siamislamtalha"
           },
           "thumbnail_url": "https://music.apple.com/favicon.ico",
           "type": "integration",
@@ -269,8 +269,8 @@
           "name": "deezer",
           "publisher": {
             "contact": null,
-            "name": "zarzet",
-            "url": "https://github.com/zarzet"
+            "name": "siamislamtalha",
+            "url": "https://github.com/siamislamtalha"
           },
           "thumbnail_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d6/Deezer_logo.svg/320px-Deezer_logo.svg.png",
           "type": "download",
@@ -285,8 +285,8 @@
           "name": "pandora",
           "publisher": {
             "contact": null,
-            "name": "zarzet",
-            "url": "https://github.com/zarzet"
+            "name": "siamislamtalha",
+            "url": "https://github.com/siamislamtalha"
           },
           "thumbnail_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Pandora_Logo.svg/320px-Pandora_Logo.svg.png",
           "type": "download",
@@ -301,8 +301,8 @@
           "name": "qobuz",
           "publisher": {
             "contact": null,
-            "name": "zarzet",
-            "url": "https://github.com/zarzet"
+            "name": "siamislamtalha",
+            "url": "https://github.com/siamislamtalha"
           },
           "thumbnail_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Qobuz_logo.svg/320px-Qobuz_logo.svg.png",
           "type": "download",
@@ -317,8 +317,8 @@
           "name": "soundcloud",
           "publisher": {
             "contact": null,
-            "name": "zarzet",
-            "url": "https://github.com/zarzet"
+            "name": "siamislamtalha",
+            "url": "https://github.com/siamislamtalha"
           },
           "thumbnail_url": "https://soundcloud.com/favicon.ico",
           "type": "download",
@@ -333,8 +333,8 @@
           "name": "spotify-web",
           "publisher": {
             "contact": null,
-            "name": "zarzet",
-            "url": "https://github.com/zarzet"
+            "name": "siamislamtalha",
+            "url": "https://github.com/siamislamtalha"
           },
           "thumbnail_url": "https://www.scdn.co/i/_global/favicon.png",
           "type": "integration",
@@ -349,8 +349,8 @@
           "name": "spotify-web-ext",
           "publisher": {
             "contact": null,
-            "name": "zarzet",
-            "url": "https://github.com/zarzet"
+            "name": "siamislamtalha",
+            "url": "https://github.com/siamislamtalha"
           },
           "thumbnail_url": "https://www.scdn.co/i/_global/favicon.png",
           "type": "download",
@@ -365,8 +365,8 @@
           "name": "tidal",
           "publisher": {
             "contact": null,
-            "name": "zarzet",
-            "url": "https://github.com/zarzet"
+            "name": "siamislamtalha",
+            "url": "https://github.com/siamislamtalha"
           },
           "thumbnail_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Tidal_logo.svg/320px-Tidal_logo.svg.png",
           "type": "download",
@@ -381,8 +381,8 @@
           "name": "ytmusic",
           "publisher": {
             "contact": null,
-            "name": "zarzet",
-            "url": "https://github.com/zarzet"
+            "name": "siamislamtalha",
+            "url": "https://github.com/siamislamtalha"
           },
           "thumbnail_url": "https://icon-icons.com/download-file?file=https%3A%2F%2Fimages.icon-icons.com%2F2657%2FPNG%2F256%2Fyoutube_music_icon_161084.png&id=161084&pack_or_individual=pack",
           "type": "download",
@@ -397,8 +397,8 @@
           "name": "ytmusic-ext",
           "publisher": {
             "contact": null,
-            "name": "zarzet",
-            "url": "https://github.com/zarzet"
+            "name": "siamislamtalha",
+            "url": "https://github.com/siamislamtalha"
           },
           "thumbnail_url": "https://icon-icons.com/download-file?file=https%3A%2F%2Fimages.icon-icons.com%2F2657%2FPNG%2F256%2Fyoutube_music_icon_161084.png&id=161084&pack_or_individual=pack",
           "type": "download",
