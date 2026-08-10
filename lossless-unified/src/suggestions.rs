@@ -1,6 +1,6 @@
 use crate::types::*;
 use crate::mapper::map_media_item;
-use bex_core::resolver::discovery::Section;
+use bex_core::resolver::discovery::{Section, SectionType};
 use bex_core::resolver::types::MediaItem;
 
 /// Fetch home sections with recommendations from all services
@@ -22,8 +22,8 @@ pub async fn fetch_home_sections() -> Result<Vec<Section>, String> {
                     sections.push(Section {
                         id: "qobuz_new_releases".to_string(),
                         title: "Qobuz: New Releases".to_string(),
-                        subtitle: "Albums".to_string(),
-                        card_type: "album".to_string(),
+                        subtitle: Some("Albums".to_string()),
+                        card_type: SectionType::Grid,
                         items: albums.into_iter().map(|a| crate::mapper::map_media_item(crate::types::MediaItemData::Album(a))).collect(),
                         more_link: None,
                     });
@@ -44,8 +44,8 @@ pub async fn fetch_home_sections() -> Result<Vec<Section>, String> {
                     sections.push(Section {
                         id: "tidal_featured".to_string(),
                         title: "Tidal: Featured Albums".to_string(),
-                        subtitle: "Albums".to_string(),
-                        card_type: "album".to_string(),
+                        subtitle: Some("Albums".to_string()),
+                        card_type: SectionType::Grid,
                         items: albums.into_iter().map(|a| crate::mapper::map_media_item(crate::types::MediaItemData::Album(a))).collect(),
                         more_link: None,
                     });
@@ -66,8 +66,8 @@ pub async fn fetch_home_sections() -> Result<Vec<Section>, String> {
                     sections.push(Section {
                         id: "deezer_charts".to_string(),
                         title: "Deezer: Charts".to_string(),
-                        subtitle: "Albums".to_string(),
-                        card_type: "album".to_string(),
+                        subtitle: Some("Albums".to_string()),
+                        card_type: SectionType::Grid,
                         items: albums.into_iter().map(|a| crate::mapper::map_media_item(crate::types::MediaItemData::Album(a))).collect(),
                         more_link: None,
                     });
@@ -88,8 +88,8 @@ pub async fn fetch_home_sections() -> Result<Vec<Section>, String> {
                     sections.push(Section {
                         id: "soundcloud_trending".to_string(),
                         title: "SoundCloud: Trending".to_string(),
-                        subtitle: "Tracks".to_string(),
-                        card_type: "track".to_string(),
+                        subtitle: Some("Tracks".to_string()),
+                        card_type: SectionType::Vlist,
                         items: tracks.into_iter().map(|t| MediaItem::Track(crate::mapper::map_track(t))).collect(),
                         more_link: None,
                     });
@@ -105,8 +105,10 @@ pub async fn fetch_home_sections() -> Result<Vec<Section>, String> {
     sections.push(Section {
         id: "best_quality".to_string(),
         title: "Highest Quality (24-bit FLAC)".to_string(),
+        subtitle: None,
+        card_type: SectionType::Grid,
         items: vec![], // Will be populated dynamically
-        page_token: None,
+        more_link: None,
     });
     
     if sections.is_empty() {

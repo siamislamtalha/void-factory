@@ -13,3 +13,6 @@ Thumbs.db
 
 # Lossless FLAC folder (contains reference code and credentials)
 Lossless FLAC/
+
+# SpotiFLAC Extension (reference material, not to be committed)
+SpotiFLAC-Extension-main/

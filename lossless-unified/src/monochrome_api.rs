@@ -66,10 +66,10 @@ async fn fetch_from_monochrome(path: &str) -> Result<Value, String> {
                     let data: Value = response.json().await
                         .map_err(|e| format!("JSON parse error: {}", e))?;
                     return Ok(data);
-                } else if response.status() == 429 {
+                } else if response.status().as_u16() == 429 {
                     last_error = format!("Rate limit hit on {}", base_url);
                     continue;
-                } else if response.status() >= 500 {
+                } else if response.status().as_u16() >= 500 {
                     last_error = format!("Server error {} on {}", response.status(), base_url);
                     continue;
                 } else {
@@ -226,6 +226,9 @@ pub async fn get_album_info(id: &str) -> Result<MonochromeResponse<MonochromeAlb
                 return Err("Deezer client not available".to_string());
             }
         }
+        MusicSource::SoundCloud | MusicSource::Amazon | MusicSource::UnifiedPlayback => {
+            return Err("Album not supported for this source".to_string());
+        }
     };
     
     Ok(MonochromeResponse {
@@ -255,8 +258,9 @@ pub async fn get_artist_info(id: &str) -> Result<MonochromeResponse<MonochromeAr
         MusicSource::Tidal => {
             let client = TIDAL_CLIENT.lock().unwrap();
             if let Some(client) = client.as_ref() {
-                let unified = client.get_artist(&actual_id).await?;
-                convert_to_monochrome_artist(unified)
+                let results = client.search_artists(&actual_id, 1).await?;
+                results.into_iter().next().map(convert_to_monochrome_artist)
+                    .ok_or("Artist not found".to_string())?
             } else {
                 return Err("Tidal client not available".to_string());
             }
@@ -264,8 +268,9 @@ pub async fn get_artist_info(id: &str) -> Result<MonochromeResponse<MonochromeAr
         MusicSource::Qobuz => {
             let client = QOBUZ_CLIENT.lock().unwrap();
             if let Some(client) = client.as_ref() {
-                let unified = client.get_artist(&actual_id).await?;
-                convert_to_monochrome_artist(unified)
+                let results = client.search_artists(&actual_id, 1).await?;
+                results.into_iter().next().map(convert_to_monochrome_artist)
+                    .ok_or("Artist not found".to_string())?
             } else {
                 return Err("Qobuz client not available".to_string());
             }
@@ -273,11 +278,15 @@ pub async fn get_artist_info(id: &str) -> Result<MonochromeResponse<MonochromeAr
         MusicSource::Deezer => {
             let client = DEEZER_CLIENT.lock().unwrap();
             if let Some(client) = client.as_ref() {
-                let unified = client.get_artist(&actual_id).await?;
-                convert_to_monochrome_artist(unified)
+                let results = client.search_artists(&actual_id, 1).await?;
+                results.into_iter().next().map(convert_to_monochrome_artist)
+                    .ok_or("Artist not found".to_string())?
             } else {
                 return Err("Deezer client not available".to_string());
             }
+        }
+        MusicSource::SoundCloud | MusicSource::Amazon | MusicSource::UnifiedPlayback => {
+            return Err("Artist not supported for this source".to_string());
         }
     };
     
@@ -320,7 +329,8 @@ pub async fn get_stream_url(id: &str, quality: &str) -> Result<MonochromeStreamI
             Quality::DolbyAtmos,    // Highest priority - Dolby Atmos
             Quality::UltraHiRes,   // 24-bit, ≤192 kHz
             Quality::HiRes,        // 24-bit, ≤96 kHz
-            Quality::High,         // 16-bit, 44.1 kHz (CD)
+            Quality::LosslessFlac, // 16-bit, 44.1 kHz (CD quality FLAC)
+            Quality::High,         // 320 kbps
             Quality::Normal,       // 320 kbps
             Quality::Low,          // 128 kbps
         ]
@@ -374,11 +384,10 @@ pub async fn get_stream_url(id: &str, quality: &str) -> Result<MonochromeStreamI
                     stream_url: Some(stream_info.url),
                     quality: stream_info.quality.as_str().to_string(),
                     codec: stream_info.codec,
-                    bitrate: stream_info.bitrate,
-                    sample_rate: stream_info.sample_rate,
-                    bit_depth: stream_info.bit_depth,
+                    bitrate: Some(stream_info.bitrate as i32),
+                    sample_rate: Some(stream_info.sample_rate as i32),
+                    bit_depth: Some(stream_info.bit_depth as i32),
                     encryption_key: stream_info.encryption_key,
-                    source: stream_info.source.as_str().to_string(),
                 });
             }
             Err(e) => {
@@ -401,10 +410,22 @@ pub async fn search(query: &str, search_type: &str, limit: u32) -> Result<Value,
     let mut results = Value::Object(serde_json::Map::new());
     
     // Parallel search across all services (advanced feature)
+    let qobuz_client = {
+        let client = QOBUZ_CLIENT.lock().unwrap();
+        client.clone()
+    };
+    let tidal_client = {
+        let client = TIDAL_CLIENT.lock().unwrap();
+        client.clone()
+    };
+    let deezer_client = {
+        let client = DEEZER_CLIENT.lock().unwrap();
+        client.clone()
+    };
+
     let (qobuz_results, tidal_results, deezer_results) = tokio::join!(
         async {
-            let client = QOBUZ_CLIENT.lock().unwrap();
-            if let Some(client) = client.as_ref() {
+            if let Some(client) = qobuz_client {
                 match search_type {
                     "tracks" => client.search_tracks(query, limit).await.ok(),
                     "albums" => client.search_albums(query, limit).await.ok(),
@@ -416,8 +437,7 @@ pub async fn search(query: &str, search_type: &str, limit: u32) -> Result<Value,
             }
         },
         async {
-            let client = TIDAL_CLIENT.lock().unwrap();
-            if let Some(client) = client.as_ref() {
+            if let Some(client) = tidal_client {
                 match search_type {
                     "tracks" => client.search_tracks(query, limit).await.ok(),
                     "albums" => client.search_albums(query, limit).await.ok(),
@@ -429,8 +449,7 @@ pub async fn search(query: &str, search_type: &str, limit: u32) -> Result<Value,
             }
         },
         async {
-            let client = DEEZER_CLIENT.lock().unwrap();
-            if let Some(client) = client.as_ref() {
+            if let Some(client) = deezer_client {
                 match search_type {
                     "tracks" => client.search_tracks(query, limit).await.ok(),
                     "albums" => client.search_albums(query, limit).await.ok(),
@@ -534,11 +553,11 @@ pub async fn advanced_search(
     ensure_clients_initialized().await;
     
     let filter = match search_type {
-        "tracks" => SearchFilter::Tracks,
-        "albums" => SearchFilter::Albums,
-        "artists" => SearchFilter::Artists,
-        "playlists" => SearchFilter::Playlists,
-        _ => SearchFilter::Tracks,
+        "tracks" => SearchFilter::Track,
+        "albums" => SearchFilter::Album,
+        "artists" => SearchFilter::Artist,
+        "playlists" => SearchFilter::Playlist,
+        _ => SearchFilter::Track,
     };
     
     let min_quality_enum = min_quality.map(|q| Quality::from_str(q));
@@ -556,16 +575,24 @@ pub async fn advanced_search(
             // Filter by sources if specified
             if let Some(ref source_list) = sources {
                 let source_str = match &item {
-                    MediaItem::Track(track) => track.source.as_str().to_lowercase(),
-                    MediaItem::Album(album) => album.source.as_str().to_lowercase(),
-                    MediaItem::Artist(artist) => artist.source.as_str().to_lowercase(),
-                    MediaItem::Playlist(playlist) => playlist.source.as_str().to_lowercase(),
+                    MediaItem::Track(track) => {
+                        track.id.split(':').next().unwrap_or("unknown").to_lowercase()
+                    }
+                    MediaItem::Album(album) => {
+                        album.id.split(':').next().unwrap_or("unknown").to_lowercase()
+                    }
+                    MediaItem::Artist(artist) => {
+                        artist.id.split(':').next().unwrap_or("unknown").to_lowercase()
+                    }
+                    MediaItem::Playlist(playlist) => {
+                        playlist.id.split(':').next().unwrap_or("unknown").to_lowercase()
+                    }
                 };
                 if !source_list.iter().any(|s| s.to_lowercase() == source_str) {
                     return None;
                 }
             }
-            Some(serde_json::to_value(item).unwrap_or_default())
+            Some(convert_media_item_to_json(item))
         })
         .take(limit as usize)
         .collect();
@@ -588,11 +615,12 @@ pub async fn get_home_data() -> Result<Value, String> {
             serde_json::json!({
                 "id": section.id,
                 "title": section.title,
+                "subtitle": section.subtitle,
+                "card_type": format!("{:?}", section.card_type),
                 "items": section.items.into_iter()
                     .map(|item| convert_media_item_to_json(item))
                     .collect::<Vec<_>>(),
-                "section_type": format!("{:?}", section.section_type),
-                "source": section.source.as_str(),
+                "more_link": section.more_link,
             })
         })
         .collect();
@@ -630,6 +658,54 @@ pub async fn get_search_suggestions(query: &str) -> Result<Value, String> {
     let mut response = Value::Object(serde_json::Map::new());
     response["data"] = serde_json::json!(suggestions_json);
     response["total"] = serde_json::json!(suggestions_json.len());
-    
+
     Ok(response)
+}
+
+/// Helper function to convert MediaItem to JSON
+fn convert_media_item_to_json(item: MediaItem) -> serde_json::Value {
+    match item {
+        MediaItem::Track(track) => {
+            serde_json::json!({
+                "type": "track",
+                "id": track.id,
+                "title": track.title,
+                "artists": track.artists.iter().map(|a| serde_json::json!({
+                    "id": a.id,
+                    "name": a.name,
+                })).collect::<Vec<_>>(),
+                "album": track.album.map(|a| serde_json::json!({
+                    "id": a.id,
+                    "title": a.title,
+                })),
+                "duration_ms": track.duration_ms,
+            })
+        }
+        MediaItem::Album(album) => {
+            serde_json::json!({
+                "type": "album",
+                "id": album.id,
+                "title": album.title,
+                "artists": album.artists.iter().map(|a| serde_json::json!({
+                    "id": a.id,
+                    "name": a.name,
+                })).collect::<Vec<_>>(),
+            })
+        }
+        MediaItem::Artist(artist) => {
+            serde_json::json!({
+                "type": "artist",
+                "id": artist.id,
+                "name": artist.name,
+            })
+        }
+        MediaItem::Playlist(playlist) => {
+            serde_json::json!({
+                "type": "playlist",
+                "id": playlist.id,
+                "title": playlist.title,
+                "owner": playlist.owner,
+            })
+        }
+    }
 }

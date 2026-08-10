@@ -1,0 +1,184 @@
+{
+  "version": 1,
+  "updated_at": "2026-07-31T00:00:00Z",
+  "extensions": [
+    {
+      "id": "spotify-web",
+      "name": "spotify-web",
+      "display_name": "Spotify Web",
+      "version": "1.9.14",
+      "description": "Fetch Spotify metadata via web API for VOID Music. Supports personalized playlists like Daily Mix, Discover Weekly, and more. Includes Home Feed explore and metadata enrichment via Spotify native ISRC plus Deezer.",
+      "download_url": "https://raw.githubusercontent.com/zarzet/SpotiFLAC-Extension/main/extensions/spotify-web.sflx",
+      "sha256": "a77976acea4f1c5e809eda9cf718821cdec010b160983c0c7de45470bbd48116",
+      "category": "integration",
+      "tags": [
+        "spotify",
+        "web",
+        "streaming",
+        "homefeed"
+      ],
+      "downloads": 0,
+      "updated_at": "2026-07-24T00:00:00Z",
+      "min_app_version": "4.3.0"
+    },
+    {
+      "id": "amazon",
+      "name": "amazon",
+      "display_name": "Amazon Music",
+      "version": "2.2.1",
+      "description": "Amazon Music metadata & download provider for VOID Music. Browse tracks, albums, artists, playlists from Amazon Music links and search. Downloads lossless and Dolby Atmos audio.",
+      "download_url": "https://raw.githubusercontent.com/zarzet/SpotiFLAC-Extension/main/extensions/amzn.sflx",
+      "sha256": "4f844e9fa5b168463fb45c4f9ae6a3f278a59b0adb0070528f5d9194cf3f75f3",
+      "category": "download",
+      "tags": [
+        "amazon",
+        "download",
+        "lossless",
+        "metadata",
+        "search"
+      ],
+      "downloads": 0,
+      "updated_at": "2026-07-10T00:00:00Z",
+      "min_app_version": "4.7.0"
+    },
+    {
+      "id": "apple-music",
+      "name": "apple-music",
+      "display_name": "Apple Music",
+      "version": "1.3.8",
+      "description": "Apple Music metadata and lyrics provider for VOID Music. Fetches ISRC, label, copyright, genre, composer. Lyrics require a Media User Token (Apple Music subscription).",
+      "download_url": "https://raw.githubusercontent.com/zarzet/SpotiFLAC-Extension/main/extensions/apple-music.sflx",
+      "sha256": "3ce70afaa81f3ece4f16240da159a73a4d96c1fd313c27e17b51e042d00dab7e",
+      "category": "integration",
+      "tags": [
+        "apple",
+        "metadata",
+        "lyrics",
+        "search"
+      ],
+      "downloads": 0,
+      "updated_at": "2026-07-31T00:00:00Z",
+      "min_app_version": "4.2.3"
+    },
+    {
+      "id": "soundcloud",
+      "name": "soundcloud",
+      "display_name": "SoundCloud",
+      "version": "1.0.5",
+      "description": "SoundCloud metadata and download provider. Search tracks, albums, playlists, artists. Downloads via direct SoundCloud streams.",
+      "download_url": "https://raw.githubusercontent.com/zarzet/SpotiFLAC-Extension/main/extensions/soundcloud.spotiflac-ext",
+      "sha256": "c4c4a643215dc345429563d233eda9364c956d6664520652859c083558b8b9a3",
+      "category": "download",
+      "tags": [
+        "soundcloud",
+        "download",
+        "metadata",
+        "search"
+      ],
+      "downloads": 0,
+      "updated_at": "2026-06-02T00:00:00Z",
+      "min_app_version": "4.3.0"
+    },
+    {
+      "id": "ytmusic-spotiflac",
+      "name": "ytmusic-spotiflac",
+      "display_name": "YouTube Music",
+      "version": "2.3.9",
+      "description": "YouTube Music metadata & download provider for VOID Music. Search tracks, albums, playlists on YouTube Music.",
+      "download_url": "https://raw.githubusercontent.com/zarzet/SpotiFLAC-Extension/main/extensions/ytmusic-spotiflac.sflx",
+      "sha256": "29e9b628c87ab0843eb2ec1e06c9fd1faec38b2b03f47f42a75b2b9565603b13",
+      "icon_url": "https://raw.githubusercontent.com/zarzet/SpotiFLAC-Extension/main/icons/ytmusic-spotiflac.jpg",
+      "category": "download",
+      "tags": [
+        "youtube",
+        "ytmusic",
+        "metadata",
+        "search",
+        "homefeed",
+        "download"
+      ],
+      "downloads": 0,
+      "updated_at": "2026-07-10T00:00:00Z",
+      "min_app_version": "4.5.1"
+    },
+    {
+      "id": "deezer",
+      "name": "deezer",
+      "display_name": "Deezer",
+      "version": "1.2.0",
+      "description": "Deezer metadata and download provider for VOID Music.",
+      "download_url": "https://raw.githubusercontent.com/zarzet/SpotiFLAC-Extension/main/extensions/deezer.sflx",
+      "sha256": "dfead5b50889d2855b4409c6796421ccb35ffd3cac1e002498924e9a7c5446b3",
+      "category": "download",
+      "tags": [
+        "deezer",
+        "download",
+        "lossless",
+        "metadata",
+        "search"
+      ],
+      "downloads": 0,
+      "updated_at": "2026-07-01T00:00:00Z",
+      "min_app_version": "4.7.0"
+    },
+    {
+      "id": "pandora",
+      "name": "pandora",
+      "display_name": "Pandora",
+      "version": "1.0.8",
+      "description": "Pandora metadata and download provider for VOID Music. Handles Pandora track and album URLs.",
+      "download_url": "https://raw.githubusercontent.com/zarzet/SpotiFLAC-Extension/main/extensions/pandora.spotiflac-ext",
+      "sha256": "46347f224f7c750ac3b68f13b4eca7f776b9b428dfab2a0aab80b967364a1a41",
+      "category": "download",
+      "tags": [
+        "pandora",
+        "download",
+        "metadata",
+        "search"
+      ],
+      "downloads": 0,
+      "updated_at": "2026-05-03T10:17:57Z",
+      "min_app_version": "4.2.3"
+    },
+    {
+      "id": "qobuz-web",
+      "name": "qobuz-web",
+      "display_name": "Qobuz",
+      "version": "1.1.0",
+      "description": "Qobuz metadata and download provider for VOID Music.",
+      "download_url": "https://raw.githubusercontent.com/zarzet/SpotiFLAC-Extension/main/extensions/qobuz-web.sflx",
+      "sha256": "9e6d14dc37623eed9ac6326c321b17fd802c36e907476f3068f7fcbe14d79f93",
+      "category": "download",
+      "tags": [
+        "qobuz",
+        "download",
+        "lossless",
+        "metadata",
+        "search"
+      ],
+      "downloads": 0,
+      "updated_at": "2026-07-01T00:00:00Z",
+      "min_app_version": "4.7.0"
+    },
+    {
+      "id": "tidal-web",
+      "name": "tidal-web",
+      "display_name": "Tidal",
+      "version": "1.1.2",
+      "description": "TIDAL metadata and search provider for VOID Music using TIDAL public web endpoints.",
+      "download_url": "https://raw.githubusercontent.com/zarzet/SpotiFLAC-Extension/main/extensions/tidal-web.sflx",
+      "sha256": "299f7fc3127e5a4534d3486210fd700c40d1f94c15c63646f729986f624424db",
+      "category": "download",
+      "tags": [
+        "tidal",
+        "download",
+        "lossless",
+        "metadata",
+        "search"
+      ],
+      "downloads": 0,
+      "updated_at": "2026-07-01T00:00:00Z",
+      "min_app_version": "4.7.0"
+    }
+  ]
+}

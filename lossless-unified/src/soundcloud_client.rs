@@ -155,9 +155,10 @@ impl SoundCloudClient {
             .map_err(|e| format!("JSON parse error: {}", e))?;
 
         if let Some(collection) = data.get("collection").and_then(|c| c.as_array()) {
-            return collection.iter()
+            let parsed: Vec<UnifiedTrack> = collection.iter()
                 .filter_map(|item| self.parse_track(item))
                 .collect();
+            return Ok(parsed);
         }
 
         Ok(vec![])
@@ -191,9 +192,10 @@ impl SoundCloudClient {
             .map_err(|e| format!("JSON parse error: {}", e))?;
 
         if let Some(collection) = data.get("collection").and_then(|c| c.as_array()) {
-            return collection.iter()
+            let parsed: Vec<UnifiedPlaylist> = collection.iter()
                 .filter_map(|item| self.parse_playlist(item))
                 .collect();
+            return Ok(parsed);
         }
 
         Ok(vec![])
@@ -205,8 +207,8 @@ impl SoundCloudClient {
         
         let params = [
             ("limit", &limit.to_string()),
-            ("offset", "0"),
-            ("linked_partitioning", "1"),
+            ("offset", &String::from("0")),
+            ("linked_partitioning", &String::from("1")),
             ("user_id", &self.user_id),
         ];
 
@@ -225,9 +227,10 @@ impl SoundCloudClient {
             .map_err(|e| format!("JSON parse error: {}", e))?;
 
         if let Some(collection) = data.get("collection").and_then(|c| c.as_array()) {
-            return collection.iter()
+            let parsed: Vec<UnifiedTrack> = collection.iter()
                 .filter_map(|item| self.parse_track(item))
                 .collect();
+            return Ok(parsed);
         }
 
         Ok(vec![])

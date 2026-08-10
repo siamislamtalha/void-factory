@@ -218,9 +218,10 @@ impl UnifiedClient {
 
         // Parse tracks from response
         if let Some(tracks) = data.get("tracks").and_then(|t| t.as_array()) {
-            return tracks.iter()
+            let parsed: Vec<UnifiedTrack> = tracks.iter()
                 .filter_map(|item| self.parse_track(item))
                 .collect();
+            return Ok(parsed);
         }
 
         Ok(vec![])

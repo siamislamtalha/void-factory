@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 /// Music service sources
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum MusicSource {
     Qobuz,
     Tidal,
@@ -50,12 +50,12 @@ impl MusicSource {
 
     pub fn max_quality(&self) -> u8 {
         match self {
-            Self::Qobuz => 4,  // 24-bit, ≤ 192 kHz
-            Self::Tidal => 4,   // 24-bit, ≤ 96 kHz (MQA) + Dolby Atmos
-            Self::Deezer => 2,  // 16-bit, 44.1 kHz (CD)
+            Self::Qobuz => 5,  // 24-bit, ≤ 192 kHz
+            Self::Tidal => 6,   // 24-bit, ≤ 96 kHz (MQA) + Dolby Atmos
+            Self::Deezer => 3,  // 16-bit, 44.1 kHz (CD)
             Self::SoundCloud => 0,  // MP3 only
-            Self::Amazon => 4,  // UHD up to 24-bit/192kHz
-            Self::UnifiedPlayback => 4,  // Depends on provider
+            Self::Amazon => 5,  // UHD up to 24-bit/192kHz
+            Self::UnifiedPlayback => 6,  // Depends on provider
         }
     }
 }
@@ -65,10 +65,11 @@ impl MusicSource {
 pub enum Quality {
     Low = 0,        // 128 kbps MP3/AAC
     Normal = 1,     // 320 kbps MP3/AAC
-    LosslessFlac = 2,       // 16-bit, 44.1 kHz (CD) - Lossless FLAC
-    HiRes = 3,      // 24-bit, ≤ 96 kHz
-    UltraHiRes = 4, // 24-bit, ≤ 192 kHz
-    DolbyAtmos = 5, // Dolby Atmos (EAC3_JOC) - highest quality
+    High = 2,       // 320 kbps MP3/AAC (High quality)
+    LosslessFlac = 3,       // 16-bit, 44.1 kHz (CD) - Lossless FLAC
+    HiRes = 4,      // 24-bit, ≤ 96 kHz
+    UltraHiRes = 5, // 24-bit, ≤ 192 kHz
+    DolbyAtmos = 6, // Dolby Atmos (EAC3_JOC) - highest quality
 }
 
 impl Quality {
@@ -76,10 +77,11 @@ impl Quality {
         match n {
             0 => Quality::Low,
             1 => Quality::Normal,
-            2 => Quality::LosslessFlac,
-            3 => Quality::HiRes,
-            4 => Quality::UltraHiRes,
-            5 => Quality::DolbyAtmos,
+            2 => Quality::High,
+            3 => Quality::LosslessFlac,
+            4 => Quality::HiRes,
+            5 => Quality::UltraHiRes,
+            6 => Quality::DolbyAtmos,
             _ => Quality::LosslessFlac,
         }
     }
@@ -92,6 +94,7 @@ impl Quality {
         match self {
             Quality::Low => "LOW",
             Quality::Normal => "NORMAL",
+            Quality::High => "HIGH",
             Quality::LosslessFlac => "LOSSLESS_FLAC",
             Quality::HiRes => "HI_RES",
             Quality::UltraHiRes => "ULTRA_HI_RES",
@@ -103,6 +106,7 @@ impl Quality {
         match self {
             Quality::Low => 128,
             Quality::Normal => 320,
+            Quality::High => 320,
             Quality::LosslessFlac => 1411,
             Quality::HiRes => 4704,
             Quality::UltraHiRes => 9408,
@@ -114,6 +118,7 @@ impl Quality {
         match s.to_uppercase().as_str() {
             "LOW" => Quality::Low,
             "NORMAL" => Quality::Normal,
+            "HIGH" => Quality::High,
             "LOSSLESS" | "LOSSLESS_FLAC" | "FLAC" => Quality::LosslessFlac,
             "HI_RES" | "HIRES" => Quality::HiRes,
             "ULTRA_HI_RES" | "ULTRAHIRES" => Quality::UltraHiRes,

@@ -1,8 +1,23 @@
 use crate::types::*;
 use bex_core::resolver::{
-    types::{MediaItem as BexMediaItem, Track as BexTrack},
+    types::{MediaItem as BexMediaItem, Track as BexTrack, Artwork as BexArtwork, ImageLayout},
     data_source::StreamSource,
 };
+
+/// Helper function to convert a URL string to Artwork struct
+fn url_to_artwork(url: String) -> BexArtwork {
+    BexArtwork {
+        url: url.clone(),
+        url_low: Some(url.clone()),
+        url_high: Some(url),
+        layout: ImageLayout::Square,
+    }
+}
+
+/// Helper function to convert optional URL to optional Artwork
+fn opt_url_to_artwork(url: Option<String>) -> Option<BexArtwork> {
+    url.map(url_to_artwork)
+}
 
 /// Convert Unified Track to BEX Track
 pub fn map_track(track: UnifiedTrack) -> BexTrack {
@@ -12,7 +27,7 @@ pub fn map_track(track: UnifiedTrack) -> BexTrack {
         artists: track.artists.unwrap_or_default().into_iter().map(|a| bex_core::resolver::types::ArtistSummary {
             id: format!("{}:{}", track.source.as_str(), a.id),
             name: a.name,
-            thumbnail: a.picture.map(|p| bex_core::resolver::types::Artwork { url: p }),
+            thumbnail: opt_url_to_artwork(a.picture),
             subtitle: None,
             url: a.url,
         }).collect(),
@@ -22,17 +37,17 @@ pub fn map_track(track: UnifiedTrack) -> BexTrack {
             artists: a.artist.iter().map(|ar| bex_core::resolver::types::ArtistSummary {
                 id: format!("{}:{}", track.source.as_str(), ar.id),
                 name: ar.name.clone(),
-                thumbnail: ar.picture.clone().map(|p| bex_core::resolver::types::Artwork { url: p }),
+                thumbnail: opt_url_to_artwork(ar.picture.clone()),
                 subtitle: None,
                 url: ar.url,
             }).collect(),
-            thumbnail: a.cover.clone().map(|c| bex_core::resolver::types::Artwork { url: c }),
+            thumbnail: opt_url_to_artwork(a.cover.clone()),
             subtitle: a.release_date.clone(),
             year: a.release_date.as_ref().and_then(|d| d.split('-').next()).and_then(|y| y.parse().ok()),
             url: a.url,
         }),
         duration_ms: Some(track.duration as u64 * 1000),
-        thumbnail: track.album.as_ref().and_then(|a| a.cover.clone()).map(|c| bex_core::resolver::types::Artwork { url: c }),
+        thumbnail: track.album.as_ref().and_then(|a| opt_url_to_artwork(a.cover.clone())),
         url: None,
         lyrics: None,
         is_explicit: false,
@@ -53,7 +68,7 @@ pub fn map_media_item(item: MediaItemData) -> bex_core::resolver::types::MediaIt
                 artists: vec![],
                 album: None,
                 duration_ms: Some(0),
-                thumbnail: bex_core::resolver::types::Artwork { url: String::new() },
+                thumbnail: url_to_artwork(String::new()),
                 url: None,
                 lyrics: None,
                 is_explicit: false,
@@ -67,7 +82,7 @@ pub fn map_media_item(item: MediaItemData) -> bex_core::resolver::types::MediaIt
                 artists: vec![],
                 album: None,
                 duration_ms: Some(0),
-                thumbnail: bex_core::resolver::types::Artwork { url: String::new() },
+                thumbnail: url_to_artwork(String::new()),
                 url: None,
                 lyrics: None,
                 is_explicit: false,
@@ -81,7 +96,7 @@ pub fn map_media_item(item: MediaItemData) -> bex_core::resolver::types::MediaIt
                 artists: vec![],
                 album: None,
                 duration_ms: Some(0),
-                thumbnail: bex_core::resolver::types::Artwork { url: String::new() },
+                thumbnail: url_to_artwork(String::new()),
                 url: None,
                 lyrics: None,
                 is_explicit: false,

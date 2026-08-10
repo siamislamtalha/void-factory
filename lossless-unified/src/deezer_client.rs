@@ -55,9 +55,10 @@ impl DeezerClient {
             .map_err(|e| format!("JSON parse error: {}", e))?;
 
         if let Some(items) = data.get("data").and_then(|d| d.as_array()) {
-            return items.iter()
+            let parsed: Vec<UnifiedTrack> = items.iter()
                 .filter_map(|item| self.parse_track(item))
                 .collect();
+            return Ok(parsed);
         }
         
         Ok(vec![])
@@ -88,9 +89,10 @@ impl DeezerClient {
             .map_err(|e| format!("JSON parse error: {}", e))?;
 
         if let Some(items) = data.get("data").and_then(|d| d.as_array()) {
-            return items.iter()
+            let parsed: Vec<UnifiedAlbum> = items.iter()
                 .filter_map(|item| self.parse_album(item))
                 .collect();
+            return Ok(parsed);
         }
         
         Ok(vec![])
@@ -121,9 +123,10 @@ impl DeezerClient {
             .map_err(|e| format!("JSON parse error: {}", e))?;
 
         if let Some(items) = data.get("data").and_then(|d| d.as_array()) {
-            return items.iter()
+            let parsed: Vec<UnifiedArtist> = items.iter()
                 .filter_map(|item| self.parse_artist(item))
                 .collect();
+            return Ok(parsed);
         }
         
         Ok(vec![])
@@ -237,7 +240,7 @@ impl DeezerClient {
 
         let response = HTTP_CLIENT
             .get(&url)
-            .query(&[("limit", &limit.to_string()), ("output", "json")])
+            .query(&[("limit", &limit.to_string()), ("output", &String::from("json"))])
             .send()
             .await
             .map_err(|e| format!("Request failed: {}", e))?;
@@ -252,12 +255,13 @@ impl DeezerClient {
         // Parse albums from charts response
         if let Some(albums) = data.get("albums").and_then(|a| a.get("data")) {
             if let Some(items) = albums.as_array() {
-                return items.iter()
+                let parsed: Vec<UnifiedAlbum> = items.iter()
                     .filter_map(|item| self.parse_album(item))
                     .collect();
+                return Ok(parsed);
             }
         }
-        
+
         Ok(vec![])
     }
 
@@ -267,7 +271,7 @@ impl DeezerClient {
 
         let response = HTTP_CLIENT
             .get(&url)
-            .query(&[("limit", &limit.to_string()), ("output", "json")])
+            .query(&[("limit", &limit.to_string()), ("output", &String::from("json"))])
             .send()
             .await
             .map_err(|e| format!("Request failed: {}", e))?;
@@ -282,12 +286,13 @@ impl DeezerClient {
         // Parse tracks from charts response
         if let Some(tracks) = data.get("tracks").and_then(|t| t.get("data")) {
             if let Some(items) = tracks.as_array() {
-                return items.iter()
+                let parsed: Vec<UnifiedTrack> = items.iter()
                     .filter_map(|item| self.parse_track(item))
                     .collect();
+                return Ok(parsed);
             }
         }
-        
+
         Ok(vec![])
     }
 
@@ -297,7 +302,7 @@ impl DeezerClient {
 
         let response = HTTP_CLIENT
             .get(&url)
-            .query(&[("limit", &limit.to_string()), ("output", "json")])
+            .query(&[("limit", &limit.to_string()), ("output", &String::from("json"))])
             .send()
             .await
             .map_err(|e| format!("Request failed: {}", e))?;

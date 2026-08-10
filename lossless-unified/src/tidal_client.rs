@@ -187,9 +187,10 @@ impl TidalClient {
         let response = self.api_request("search/tracks", &params).await?;
         
         if let Some(items) = response.get("items").and_then(|i| i.as_array()) {
-            return items.iter()
+            let parsed: Vec<UnifiedTrack> = items.iter()
                 .filter_map(|item| self.parse_track(item))
                 .collect();
+            return Ok(parsed);
         }
         
         Ok(vec![])
@@ -206,9 +207,10 @@ impl TidalClient {
         let response = self.api_request("search/albums", &params).await?;
         
         if let Some(items) = response.get("items").and_then(|i| i.as_array()) {
-            return items.iter()
+            let parsed: Vec<UnifiedAlbum> = items.iter()
                 .filter_map(|item| self.parse_album(item))
                 .collect();
+            return Ok(parsed);
         }
         
         Ok(vec![])
@@ -225,9 +227,10 @@ impl TidalClient {
         let response = self.api_request("search/artists", &params).await?;
         
         if let Some(items) = response.get("items").and_then(|i| i.as_array()) {
-            return items.iter()
+            let parsed: Vec<UnifiedArtist> = items.iter()
                 .filter_map(|item| self.parse_artist(item))
                 .collect();
+            return Ok(parsed);
         }
         
         Ok(vec![])
@@ -283,9 +286,10 @@ impl TidalClient {
         
         // Parse featured albums from response
         if let Some(items) = response.get("items").and_then(|i| i.as_array()) {
-            return items.iter()
+            let parsed: Vec<UnifiedAlbum> = items.iter()
                 .filter_map(|item| self.parse_album(item))
                 .collect();
+            return Ok(parsed);
         }
         
         Ok(vec![])
@@ -301,9 +305,10 @@ impl TidalClient {
         let response = self.api_request("tracks/top", &params).await?;
         
         if let Some(items) = response.get("items").and_then(|i| i.as_array()) {
-            return items.iter()
+            let parsed: Vec<UnifiedTrack> = items.iter()
                 .filter_map(|item| self.parse_track(item))
                 .collect();
+            return Ok(parsed);
         }
         
         Ok(vec![])
@@ -378,26 +383,6 @@ impl TidalClient {
             sample_rate,
             bit_depth,
         })
-    }
-
-    /// Get featured/new releases
-    pub async fn get_featured(&self, limit: u32) -> Result<Vec<UnifiedAlbum>, String> {
-        let params = serde_json::json!({
-            "limit": limit,
-            "countryCode": self.country_code,
-            "type": "new",
-        });
-
-        let response = self.api_request("pages/new", &params).await?;
-        
-        // Parse featured albums from response
-        if let Some(items) = response.get("items").and_then(|i| i.as_array()) {
-            return items.iter()
-                .filter_map(|item| self.parse_album(item))
-                .collect();
-        }
-        
-        Ok(vec![])
     }
 
     async fn api_request(&self, endpoint: &str, params: &Value) -> Result<Value, String> {

@@ -30,39 +30,53 @@ pub async fn fetch_home_sections() -> Result<Vec<Section>, String> {
     }
     
     let mut all_sections = Vec::new();
-    
+
+    // Clone client references before spawning to avoid holding locks across await
+    let qobuz_client = {
+        let client = QOBUZ_CLIENT.lock().unwrap();
+        client.clone()
+    };
+    let tidal_client = {
+        let client = TIDAL_CLIENT.lock().unwrap();
+        client.clone()
+    };
+    let deezer_client = {
+        let client = DEEZER_CLIENT.lock().unwrap();
+        client.clone()
+    };
+    let soundcloud_client = {
+        let client = SOUNDCLOUD_CLIENT.lock().unwrap();
+        client.clone()
+    };
+
     // Spawn parallel requests to all services
     let qobuz_handle = tokio::spawn(async move {
-        let client = QOBUZ_CLIENT.lock().unwrap();
-        if let Some(client) = client.as_ref() {
-            fetch_qobuz_home_sections(client).await
+        if let Some(client) = qobuz_client {
+            fetch_qobuz_home_sections(&client).await
         } else {
             Ok(vec![])
         }
     });
-    
+
     let tidal_handle = tokio::spawn(async move {
-        let client = TIDAL_CLIENT.lock().unwrap();
-        if let Some(client) = client.as_ref() {
-            fetch_tidal_home_sections(client).await
+        if let Some(client) = tidal_client {
+            fetch_tidal_home_sections(&client).await
         } else {
             Ok(vec![])
         }
     });
-    
+
     let deezer_handle = tokio::spawn(async move {
-        let client = DEEZER_CLIENT.lock().unwrap();
-        if let Some(client) = client.as_ref() {
-            fetch_deezer_home_sections(client).await
+        if let Some(client) = deezer_client {
+            fetch_deezer_home_sections(&client).await
         } else {
             Ok(vec![])
         }
     });
-    
+
     let soundcloud_handle = tokio::spawn(async move {
-        let client = SOUNDCLOUD_CLIENT.lock().unwrap();
-        if let Some(client) = client.as_ref() {
-            fetch_soundcloud_home_sections(client).await
+        if let Some(client) = soundcloud_client {
+            fetch_soundcloud_home_sections(&client).await
         } else {
             Ok(vec![])
         }
@@ -132,43 +146,54 @@ pub async fn fetch_search_suggestions(query: &str) -> Result<Vec<SearchSuggestio
     }
     
     let mut all_suggestions = Vec::new();
-    
+
+    // Clone client references before spawning to avoid holding locks across await
+    let qobuz_client = {
+        let client = QOBUZ_CLIENT.lock().unwrap();
+        client.clone()
+    };
+    let tidal_client = {
+        let client = TIDAL_CLIENT.lock().unwrap();
+        client.clone()
+    };
+    let deezer_client = {
+        let client = DEEZER_CLIENT.lock().unwrap();
+        client.clone()
+    };
+    let soundcloud_client = {
+        let client = SOUNDCLOUD_CLIENT.lock().unwrap();
+        client.clone()
+    };
+
     // Spawn parallel requests to all services
     let query_clone = query.to_string();
     let qobuz_handle = tokio::spawn(async move {
-        let client = QOBUZ_CLIENT.lock().unwrap();
-        if let Some(client) = client.as_ref() {
-            fetch_qobuz_search_suggestions(client, &query_clone).await
+        if let Some(client) = qobuz_client {
+            fetch_qobuz_search_suggestions(&client, &query_clone).await
         } else {
             Ok(vec![])
         }
     });
-    
-    let query_clone = query.to_string();
+
     let tidal_handle = tokio::spawn(async move {
-        let client = TIDAL_CLIENT.lock().unwrap();
-        if let Some(client) = client.as_ref() {
-            fetch_tidal_search_suggestions(client, &query_clone).await
+        if let Some(client) = tidal_client {
+            fetch_tidal_search_suggestions(&client, &query_clone).await
         } else {
             Ok(vec![])
         }
     });
-    
-    let query_clone = query.to_string();
+
     let deezer_handle = tokio::spawn(async move {
-        let client = DEEZER_CLIENT.lock().unwrap();
-        if let Some(client) = client.as_ref() {
-            fetch_deezer_search_suggestions(client, &query_clone).await
+        if let Some(client) = deezer_client {
+            fetch_deezer_search_suggestions(&client, &query_clone).await
         } else {
             Ok(vec![])
         }
     });
-    
-    let query_clone = query.to_string();
+
     let soundcloud_handle = tokio::spawn(async move {
-        let client = SOUNDCLOUD_CLIENT.lock().unwrap();
-        if let Some(client) = client.as_ref() {
-            fetch_soundcloud_search_suggestions(client, &query_clone).await
+        if let Some(client) = soundcloud_client {
+            fetch_soundcloud_search_suggestions(&client, &query_clone).await
         } else {
             Ok(vec![])
         }
@@ -226,12 +251,13 @@ pub fn get_cached_search_suggestions(query: &str) -> Option<Vec<SearchSuggestion
 /// Convert home sections to BEX format
 fn convert_to_bex_sections(sections: &[HomeSection]) -> Vec<Section> {
     use crate::mapper::map_media_item;
+    use bex_core::resolver::discovery::SectionType;
     sections.iter().map(|section| {
         Section {
             id: section.id.clone(),
             title: section.title.clone(),
-            subtitle: section.section_type.as_str().to_string(),
-            card_type: "default".to_string(),
+            subtitle: Some(section.section_type.as_str().to_string()),
+            card_type: SectionType::Grid,
             items: section.items.iter().filter_map(|item| {
                 Some(map_media_item(item.clone()))
             }).collect(),
@@ -366,13 +392,17 @@ async fn fetch_soundcloud_home_sections(client: &crate::soundcloud_client::Sound
 /// Fetch Qobuz search suggestions
 async fn fetch_qobuz_search_suggestions(client: &crate::qobuz_client::QobuzClient, query: &str) -> Result<Vec<SearchSuggestion>, String> {
     let tracks = client.search_tracks(query, 5).await?;
-    
+
     Ok(tracks.into_iter().map(|track| {
         SearchSuggestion {
-            text: format!("{} - {}", track.title, track.artist.as_ref().map(|a| &a.name).unwrap_or(&"Unknown".to_string())),
-            subtitle: track.album.as_ref().map(|a| a.title.clone()),
-            item_type: SuggestionItemType::Track,
-            source: MusicSource::Qobuz,
+            text: format!("{} - {}", track.title, track.artists.first().map(|a| &a.name).unwrap_or(&"Unknown".to_string())),
+            suggestion_type: SuggestionType::Track,
+            metadata: Some(SuggestionMetadata {
+                id: track.id.clone(),
+                artist: track.artists.first().map(|a| a.name.clone()),
+                cover: track.album.as_ref().and_then(|a| a.cover.clone()),
+                source: MusicSource::Qobuz,
+            }),
         }
     }).collect())
 }
@@ -380,13 +410,17 @@ async fn fetch_qobuz_search_suggestions(client: &crate::qobuz_client::QobuzClien
 /// Fetch Tidal search suggestions
 async fn fetch_tidal_search_suggestions(client: &crate::tidal_client::TidalClient, query: &str) -> Result<Vec<SearchSuggestion>, String> {
     let tracks = client.search_tracks(query, 5).await?;
-    
+
     Ok(tracks.into_iter().map(|track| {
         SearchSuggestion {
-            text: format!("{} - {}", track.title, track.artist.as_ref().map(|a| &a.name).unwrap_or(&"Unknown".to_string())),
-            subtitle: track.album.as_ref().map(|a| a.title.clone()),
-            item_type: SuggestionItemType::Track,
-            source: MusicSource::Tidal,
+            text: format!("{} - {}", track.title, track.artists.first().map(|a| &a.name).unwrap_or(&"Unknown".to_string())),
+            suggestion_type: SuggestionType::Track,
+            metadata: Some(SuggestionMetadata {
+                id: track.id.clone(),
+                artist: track.artists.first().map(|a| a.name.clone()),
+                cover: track.album.as_ref().and_then(|a| a.cover.clone()),
+                source: MusicSource::Tidal,
+            }),
         }
     }).collect())
 }
@@ -394,13 +428,17 @@ async fn fetch_tidal_search_suggestions(client: &crate::tidal_client::TidalClien
 /// Fetch Deezer search suggestions
 async fn fetch_deezer_search_suggestions(client: &crate::deezer_client::DeezerClient, query: &str) -> Result<Vec<SearchSuggestion>, String> {
     let tracks = client.search_tracks(query, 5).await?;
-    
+
     Ok(tracks.into_iter().map(|track| {
         SearchSuggestion {
-            text: format!("{} - {}", track.title, track.artist.as_ref().map(|a| &a.name).unwrap_or(&"Unknown".to_string())),
-            subtitle: track.album.as_ref().map(|a| a.title.clone()),
-            item_type: SuggestionItemType::Track,
-            source: MusicSource::Deezer,
+            text: format!("{} - {}", track.title, track.artists.first().map(|a| &a.name).unwrap_or(&"Unknown".to_string())),
+            suggestion_type: SuggestionType::Track,
+            metadata: Some(SuggestionMetadata {
+                id: track.id.clone(),
+                artist: track.artists.first().map(|a| a.name.clone()),
+                cover: track.album.as_ref().and_then(|a| a.cover.clone()),
+                source: MusicSource::Deezer,
+            }),
         }
     }).collect())
 }
@@ -408,13 +446,17 @@ async fn fetch_deezer_search_suggestions(client: &crate::deezer_client::DeezerCl
 /// Fetch SoundCloud search suggestions
 async fn fetch_soundcloud_search_suggestions(client: &crate::soundcloud_client::SoundCloudClient, query: &str) -> Result<Vec<SearchSuggestion>, String> {
     let tracks = client.search_tracks(query, 5).await?;
-    
+
     Ok(tracks.into_iter().map(|track| {
         SearchSuggestion {
-            text: format!("{} - {}", track.title, track.artist.as_ref().map(|a| &a.name).unwrap_or(&"Unknown".to_string())),
-            subtitle: track.album.as_ref().map(|a| a.title.clone()),
-            item_type: SuggestionItemType::Track,
-            source: MusicSource::SoundCloud,
+            text: format!("{} - {}", track.title, track.artists.first().map(|a| &a.name).unwrap_or(&"Unknown".to_string())),
+            suggestion_type: SuggestionType::Track,
+            metadata: Some(SuggestionMetadata {
+                id: track.id.clone(),
+                artist: track.artists.first().map(|a| a.name.clone()),
+                cover: track.album.as_ref().and_then(|a| a.cover.clone()),
+                source: MusicSource::SoundCloud,
+            }),
         }
     }).collect())
 }

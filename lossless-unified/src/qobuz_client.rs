@@ -241,12 +241,13 @@ impl QobuzClient {
         
         if let Some(tracks) = response.get("tracks").and_then(|t| t.get("items")) {
             if let Some(items) = tracks.as_array() {
-                return items.iter()
+                let parsed: Vec<UnifiedTrack> = items.iter()
                     .filter_map(|item| self.parse_track(item))
                     .collect();
+                return Ok(parsed);
             }
         }
-        
+
         Ok(vec![])
     }
 
@@ -261,9 +262,10 @@ impl QobuzClient {
         
         if let Some(albums) = response.get("albums").and_then(|a| a.get("items")) {
             if let Some(items) = albums.as_array() {
-                return items.iter()
+                let parsed: Vec<UnifiedAlbum> = items.iter()
                     .filter_map(|item| self.parse_album(item))
                     .collect();
+                return Ok(parsed);
             }
         }
         
@@ -281,9 +283,10 @@ impl QobuzClient {
         
         if let Some(artists) = response.get("artists").and_then(|a| a.get("items")) {
             if let Some(items) = artists.as_array() {
-                return items.iter()
+                let parsed: Vec<UnifiedArtist> = items.iter()
                     .filter_map(|item| self.parse_artist(item))
                     .collect();
+                return Ok(parsed);
             }
         }
         
@@ -368,9 +371,10 @@ impl QobuzClient {
         
         if let Some(albums) = response.get("albums").and_then(|a| a.get("items")) {
             if let Some(items) = albums.as_array() {
-                return items.iter()
+                let parsed: Vec<UnifiedAlbum> = items.iter()
                     .filter_map(|item| self.parse_album(item))
                     .collect();
+                return Ok(parsed);
             }
         }
         

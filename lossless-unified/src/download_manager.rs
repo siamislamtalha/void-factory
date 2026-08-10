@@ -99,11 +99,12 @@ impl DownloadManager {
         };
         
         // Get stream URL at requested quality
+        let quality_num = request.quality.as_number();
         let stream_info = match source {
             MusicSource::Qobuz => {
                 let client = QOBUZ_CLIENT.lock().unwrap();
                 if let Some(client) = client.as_ref() {
-                    client.get_stream_url(&actual_id, request.quality).await?
+                    client.get_stream_url(&actual_id, quality_num).await?
                 } else {
                     return Err("Qobuz client not available".to_string());
                 }
@@ -111,7 +112,7 @@ impl DownloadManager {
             MusicSource::Tidal => {
                 let client = TIDAL_CLIENT.lock().unwrap();
                 if let Some(client) = client.as_ref() {
-                    client.get_stream_url(&actual_id, request.quality).await?
+                    client.get_stream_url(&actual_id, quality_num).await?
                 } else {
                     return Err("Tidal client not available".to_string());
                 }
@@ -119,7 +120,7 @@ impl DownloadManager {
             MusicSource::Deezer => {
                 let client = DEEZER_CLIENT.lock().unwrap();
                 if let Some(client) = client.as_ref() {
-                    client.get_stream_url(&actual_id, request.quality).await?
+                    client.get_stream_url(&actual_id, quality_num).await?
                 } else {
                     return Err("Deezer client not available".to_string());
                 }
@@ -127,7 +128,7 @@ impl DownloadManager {
             MusicSource::SoundCloud => {
                 let client = SOUNDCLOUD_CLIENT.lock().unwrap();
                 if let Some(client) = client.as_ref() {
-                    client.get_stream_url(&actual_id, request.quality).await?
+                    client.get_stream_url(&actual_id, 0).await?
                 } else {
                     return Err("SoundCloud client not available".to_string());
                 }
@@ -198,25 +199,25 @@ impl DownloadManager {
         let mut counter = 0usize;
         
         let start_time = std::time::Instant::now();
-        
-        // Stream using bytes API for better performance
+
+        // Stream using chunk() for better performance
         let mut stream = response.bytes_stream();
-        
+
         use futures_util::StreamExt;
-        
+
         while let Some(chunk_result) = stream.next().await {
             let chunk = chunk_result.map_err(|e| format!("Stream error: {}", e))?;
             data.extend_from_slice(&chunk);
             downloaded += chunk.len() as u64;
             counter += 1;
-            
+
             // Update progress
             let progress = if total_size > 0 {
                 downloaded as f64 / total_size as f64
             } else {
                 0.0
             };
-            
+
             // Calculate speed and ETA
             let elapsed = start_time.elapsed().as_secs_f64();
             let speed = if elapsed > 0.0 {
@@ -224,7 +225,7 @@ impl DownloadManager {
             } else {
                 None
             };
-            
+
             let eta = if let Some(s) = speed {
                 if total_size > 0 && s > 0.0 {
                     Some((total_size - downloaded) as f64 / s)
@@ -234,15 +235,15 @@ impl DownloadManager {
             } else {
                 None
             };
-            
-            self.update_progress(download_id, DownloadStatus::Downloading, progress, speed, eta);
-            
+
+            self.update_progress(download_id, DownloadStatus::Downloading, progress as f32, speed.map(|s| s as u64), eta.map(|e| e as u64));
+
             // Yield to event loop every 1MB (streamrip optimization)
             if counter % yield_every == 0 {
                 tokio::task::yield_now().await;
             }
         }
-        
+
         Ok(data)
     }
 
@@ -345,8 +346,9 @@ pub async fn auto_download_best_quality(track_id: &str, download_folder: &str) -
     let qualities = vec![
         Quality::DolbyAtmos,      // Highest priority - Dolby Atmos
         Quality::UltraHiRes,     // 24-bit, ≤192 kHz
-        Quality::HiRes,          // 24-bit, ≤96 kHz  
-        Quality::High,           // 16-bit, 44.1 kHz (CD quality)
+        Quality::HiRes,          // 24-bit, ≤96 kHz
+        Quality::LosslessFlac,   // 16-bit, 44.1 kHz (CD quality FLAC)
+        Quality::High,           // 320 kbps
         Quality::Normal,         // 320 kbps
         Quality::Low,            // 128 kbps
     ];
