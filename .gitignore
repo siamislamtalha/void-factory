@@ -1,4 +1,4 @@
-# --- bex factory managed ---
+﻿# --- bex factory managed ---
 /plugins/
 /target/
 **/target/
@@ -16,3 +16,6 @@ Lossless FLAC/
 
 # SpotiFLAC Extension (reference material, not to be committed)
 SpotiFLAC-Extension-main/
+
+!void-extensions/extensions/*.bex
+

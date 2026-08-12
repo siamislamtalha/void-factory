@@ -1,4 +1,4 @@
-{
+﻿{
   "plugins": [
     {
       "asset_name": "applemusicimporter.bex",
@@ -229,7 +229,7 @@
     "Audiophile": {
       "plugins": [
         {
-          "asset_name": "amzn.sflx",
+          "asset_name": "audiophile-amazon.bex",
           "created_at": "2026-07-10T00:00:00Z",
           "description": "Amazon Music metadata & download provider for VOID Music. Browse tracks, albums, artists, playlists from Amazon Music links and search. Downloads lossless and Dolby Atmos audio.",
           "id": "audiophile.voidfactory.amazon",
@@ -245,7 +245,7 @@
           "version": "2.2.1"
         },
         {
-          "asset_name": "apple-music.sflx",
+          "asset_name": "audiophile-apple-music.bex",
           "created_at": "2026-07-31T00:00:00Z",
           "description": "Apple Music metadata and lyrics provider for VOID Music. Fetches ISRC, label, copyright, genre, composer. Lyrics require a Media User Token (Apple Music subscription).",
           "id": "audiophile.voidfactory.apple-music",
@@ -261,7 +261,7 @@
           "version": "1.3.8"
         },
         {
-          "asset_name": "deezer.sflx",
+          "asset_name": "audiophile-deezer.bex",
           "created_at": "2026-07-01T00:00:00Z",
           "description": "Deezer metadata and download provider for VOID Music.",
           "id": "audiophile.voidfactory.deezer",
@@ -277,7 +277,7 @@
           "version": "1.2.0"
         },
         {
-          "asset_name": "pandora.spotiflac-ext",
+          "asset_name": "audiophile-pandora.bex",
           "created_at": "2026-05-03T10:17:57Z",
           "description": "Pandora metadata and download provider for VOID Music. Handles Pandora track and album URLs.",
           "id": "audiophile.voidfactory.pandora",
@@ -293,7 +293,7 @@
           "version": "1.0.8"
         },
         {
-          "asset_name": "qobuz-web.sflx",
+          "asset_name": "audiophile-qobuz.bex",
           "created_at": "2026-07-01T00:00:00Z",
           "description": "Qobuz metadata and download provider for VOID Music.",
           "id": "audiophile.voidfactory.qobuz",
@@ -309,7 +309,7 @@
           "version": "1.1.0"
         },
         {
-          "asset_name": "soundcloud.spotiflac-ext",
+          "asset_name": "audiophile-soundcloud.bex",
           "created_at": "2026-06-02T00:00:00Z",
           "description": "SoundCloud metadata and download provider. Search tracks, albums, playlists, artists. Downloads via direct SoundCloud streams.",
           "id": "audiophile.voidfactory.soundcloud",
@@ -325,7 +325,7 @@
           "version": "1.0.5"
         },
         {
-          "asset_name": "spotify-web.sflx",
+          "asset_name": "audiophile-spotify.bex",
           "created_at": "2026-07-24T00:00:00Z",
           "description": "Fetch Spotify metadata via web API for VOID Music. Supports personalized playlists like Daily Mix, Discover Weekly, and more. Includes Home Feed explore and metadata enrichment via Spotify native ISRC plus Deezer.",
           "id": "audiophile.voidfactory.spotify-web",
@@ -341,7 +341,7 @@
           "version": "1.9.14"
         },
         {
-          "asset_name": "spotify-web.spotiflac-ext",
+          "asset_name": "audiophile-spotify-ext.bex",
           "created_at": "2026-07-24T00:00:00Z",
           "description": "Spotify Web metadata and download provider for VOID Music.",
           "id": "audiophile.voidfactory.spotify-web-ext",
@@ -357,7 +357,7 @@
           "version": "1.0.0"
         },
         {
-          "asset_name": "tidal-web.sflx",
+          "asset_name": "audiophile-tidal.bex",
           "created_at": "2026-07-01T00:00:00Z",
           "description": "TIDAL metadata and search provider for VOID Music using TIDAL public web endpoints.",
           "id": "audiophile.voidfactory.tidal",
@@ -373,7 +373,7 @@
           "version": "1.1.2"
         },
         {
-          "asset_name": "ytmusic-spotiflac.sflx",
+          "asset_name": "audiophile-ytmusic.bex",
           "created_at": "2026-07-10T00:00:00Z",
           "description": "YouTube Music metadata & download provider for VOID Music. Search tracks, albums, playlists on YouTube Music.",
           "id": "audiophile.voidfactory.ytmusic",
@@ -389,7 +389,7 @@
           "version": "2.3.9"
         },
         {
-          "asset_name": "ytmusic-spotiflac.spotiflac-ext",
+          "asset_name": "audiophile-ytmusic-ext.bex",
           "created_at": "2026-07-10T00:00:00Z",
           "description": "YouTube Music metadata & download provider for VOID Music. Search tracks, albums, playlists on YouTube Music.",
           "id": "audiophile.voidfactory.ytmusic-ext",
